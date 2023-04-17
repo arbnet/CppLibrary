@@ -1,47 +1,48 @@
-/** РўРёРїС‹ РґР°РЅРЅС‹С… */
+// Типы данных
+
 #ifndef FILE_types
 
 #include "time.h"
 
-/** Р›РѕРіРёС‡РµСЃРєРёР№ С‚РёРї 0..1 */
+/** Логический тип 0..1 */
 typedef bool LOGIC;
-/** Р‘СѓРєРІР° */
+/** Буква */
 typedef char LETTER;
-/** Р”РёР°РїР°Р·РѕРЅ -128..127 */
+/** Диапазон -128..127 */
 typedef __INT8_TYPE__ RANGE;
-/** Р‘Р°Р№С‚ 0..255 */
+/** Байт 0..255 */
 typedef __UINT8_TYPE__ BYTE;
-/** Р¦РµР»РѕРµ С‡РёСЃР»Рѕ
+/** Целое число
  * -32768..32767 */
 typedef __INT16_TYPE__ INT_S;
-/** Р¦РµР»РѕРµ С‡РёСЃР»Рѕ
+/** Целое число
  * 0..65535 */
 typedef __UINT16_TYPE__ INT_W;
-/** Р¦РµР»РѕРµ С‡РёСЃР»Рѕ
+/** Целое число
  * -2147483648..2147483647 */
 typedef __INT32_TYPE__ INT_M;
-/** Р¦РµР»РѕРµ С‡РёСЃР»Рѕ
+/** Целое число
  * 0..4294967295 */
 typedef __UINT32_TYPE__ INT_L;
-/** Р¦РµР»РѕРµ С‡РёСЃР»Рѕ
+/** Целое число
  * -9223372036854775808..9223372036854775807 */
 typedef __INT64_TYPE__ INT_T;
-/** Р¦РµР»РѕРµ С‡РёСЃР»Рѕ
+/** Целое число
  * 0..18446744073709551615 */
 typedef __UINT64_TYPE__ INT_B;
-/** РџР»Р°РІР°СЋС‰РµРµ С‡РёСЃР»Рѕ
- * 1.8E-38..1.8E+38		32b С‚РѕС‡РЅРѕСЃС‚СЊ 6 .3 Р·РЅР°РєРѕРІ */
+/** Плавающее число
+ * 1.8E-38..1.8E+38		32b точность 6 .3 знаков */
 typedef float FLOAT;
-/** РџР»Р°РІР°СЋС‰РµРµ С‡РёСЃР»Рѕ РґРІРѕР№РЅРѕР№ С‚РѕС‡РЅРѕСЃС‚Рё
- * 2.2E-308..1.8E+308	64b	С‚РѕС‡РЅРѕСЃС‚СЊ 15 .6 Р·РЅР°РєРѕРІ */
+/** Плавающее число двойной точности
+ * 2.2E-308..1.8E+308	64b	точность 15 .6 знаков */
 typedef double DOUBLE;
-/** РЈРєР°Р·Р°С‚РµР»СЊ */
+/** Указатель */
 typedef void* POINTER;
 
-/** РњР°СЃСЃРёРІ СЃРёРјРІРѕР»РѕРІ */
+/** Массив символов */
 #define CHARS(ltr) const char ltr[]
 
-/** РЎС‚СЂСѓРєС‚СѓСЂР° Р±РёС‚РѕРІ .b0..b7 */
+/** Структура битов .b0..b7 */
 struct Bits {
 	unsigned b0:1;
 	unsigned b1:1;
@@ -52,7 +53,7 @@ struct Bits {
 	unsigned b6:1;
 	unsigned b7:1;
 };
-/** РЎС‚СЂСѓРєС‚СѓСЂР° Р±Р°Р№С‚РѕРІ .b0..b7 */
+/** Структура байтов .b0..b7 */
 struct Bytes {
 	BYTE b0;
 	BYTE b1;
@@ -63,12 +64,12 @@ struct Bytes {
 	BYTE b6;
 	BYTE b7;
 };
-/** РЎС‚СЂСѓРєС‚СѓСЂР° Р°РґСЂРµСЃР° .a1.a2 */
+/** Структура адреса .a1.a2 */
 struct Addrs {
 	POINTER a1;
 	POINTER a2;
 };
-/** РЎС‚СЂСѓРєС‚СѓСЂР° РґР°С‚С‹-РІСЂРµРјРµРЅРё */
+/** Структура даты-времени */
 struct DateTime {
 	int seconds;
 	int minutes;
@@ -80,143 +81,168 @@ struct DateTime {
 	int yday;
 	int summer;
 };
-/** РЎРѕСЋР· BYTE & Bits */
+/** Союз BYTE & Bits */
 union Code {
 	BYTE byte;
 	Bits bit;
 };
-/** РЎРѕСЋР· INT_B & Bytes */
+/** Союз INT_B & Bytes */
 union Block {
 	INT_B numb;
 	Bytes byte;
 };
-/** РЎРѕСЋР· tm & DateTime */
+/** Союз tm & DateTime */
 union DatetimeU {
 	struct tm stm;
 	DateTime dtm;
 };
-/** РџСЂРѕСЃС‚СЂР°РЅСЃС‚РІРѕ РёРјС‘С‚ РѕС‚ _types */
+
+/** Пространство имёт от _types */
 namespace t {
-	template<bool> struct Logic;
-	template<> struct Logic<true>{static const LOGIC v=true;};
-	template<> struct Logic<false>{static const LOGIC v=false;};
+	/** Проверка на тип\класс */
 	template <bool tBool, class oCLASS=void>
 	struct IfType {};
 	template <class oCLASS>
 	struct IfType<true, oCLASS> {typedef oCLASS type;};
+	/** Включение в компиляцию */
 	template <bool tBool, class oCLASS=void>
 	using Enable = typename IfType<tBool,oCLASS>::type;
+	/** Сравнение типов */
 	template <typename T1,typename T2>
 	struct Match {static const bool v=false;};
 	template <typename T0>
 	struct Match<T0,T0> {static const bool v=true;};
+	/** Ниличие типа в перечне */
 	template <typename dTYPE, typename ...aTYPE>
 	struct IsMatch{static constexpr bool v{(Match<dTYPE,aTYPE>::v || ...)};};
 
-	/** РџРѕРјРµРЅСЏС‚СЊ РјРµСЃС‚Р°РјРё РїРµСЂРµРјРµРЅРЅС‹Рµ */
+	/** Поменять местами переменные
+	 * @param var1 переменная 1
+	 * @param var2 переменная 2	*/
 	template <typename dTYPE>
-	void swap(dTYPE &obj1, dTYPE &obj2){
-		dTYPE tmp(obj1);obj1=obj2;obj2=tmp;
+	void swap(dTYPE &var1, dTYPE &var2){
+		dTYPE tmp(var1);var1=var2;var2=tmp;
 	}
-	/** РЎРґРІРёРі Р·РЅР°С‡РµРЅРёСЏ */
+	/** Сдвиг указателя
+	 * @param pnt указатель
+	 * @param shift смещение */
 	template <typename dTYPE>
 	void shift(dTYPE* &pnt,INT_S shift=1){
 		pnt+=shift;
 	}
-	/** РЎРґРІРёРі СѓРєР°Р·Р°С‚РµР»СЏ */
+	/** Сдвиг указателя
+	 * @param pnt указатель
+	 * @param shift смещение */
 	void shift(POINTER &pnt,INT_S shift=1){
 		pnt=(POINTER*)((INT_B)pnt+shift);
 	}
-	/** Р—Р°РїРѕР»РЅРµРЅРёРµ Р·РЅР°С‡РµРЅРёРµРј */
+	/** Заполнение памяти значением
+	 * @param pnt указатель адреса
+	 * @param size размер\\длинна
+	 * @param val значение */
 	template <typename dTYPE=BYTE>
-	void fill(POINTER &adr,INT_W size,dTYPE val=0){
+	void fill(POINTER &pnt,INT_W size,dTYPE val=0){
 		while(size>0){
-			*(dTYPE*)adr=val;shift(adr,sizeof(dTYPE));size--;
+			*(dTYPE*)pnt=val;shift(pnt,sizeof(dTYPE));size--;
 		}
 	}
-	/** РљРѕРїРёСЂРѕРІР°РЅРёРµ РІ РїР°РјСЏС‚Рё */
-	void copy(Addrs &adr,INT_M size){
+	/** Копирование в памяти
+	 * @param pnt1 указатель адреса 1
+	 * @param pnt2 указатель адреса 2
+	 * @param size размер */
+	void copy(POINTER &pnt1,POINTER &pnt2,INT_M size){
 		INT_W ct;
 		if(size>0){
 			ct=size/8;
 			if(ct>0){size=size%8;
 				do{
-					*(INT_B*)adr.a1=*(INT_B*)adr.a2;
-					shift(adr.a1,8);shift(adr.a2,8);ct--;
+					*(INT_B*)pnt1=*(INT_B*)pnt2;
+					shift(pnt1,8);shift(pnt2,8);ct--;
 				}while(ct>0);
 			}
 			ct=size/4;
 			if(ct>0){size=size%4;
 				do{
-					*(INT_L*)adr.a1=*(INT_L*)adr.a2;
-					shift(adr.a1,4);shift(adr.a2,4);ct--;
+					*(INT_L*)pnt1=*(INT_L*)pnt2;
+					shift(pnt1,4);shift(pnt2,4);ct--;
 				}while(ct>0);
 			}
 			ct=size/2;
 			if(ct>0){size=size%2;
 				do{
-					*(INT_W*)adr.a1=*(INT_W*)adr.a2;
-					shift(adr.a1,2);shift(adr.a2,2);ct--;
+					*(INT_W*)pnt1=*(INT_W*)pnt2;
+					shift(pnt1,2);shift(pnt2,2);ct--;
 				}while(ct>0);
 			}
 			if(size>0){ct=size;
 				do{
-					*(BYTE*)adr.a1=*(BYTE*)adr.a2;
-					shift(adr.a1,1);shift(adr.a2,1);ct--;
+					*(BYTE*)pnt1=*(BYTE*)pnt2;
+					shift(pnt1,1);shift(pnt2,1);ct--;
 				}while(ct>0);
 			}
 		}else{size=-size;
 			ct=size/8;
 			if(ct>0){size=size%8;
 				do{
-					shift(adr.a1,-8);shift(adr.a2,-8);ct--;
-					*(INT_B*)adr.a1=*(INT_B*)adr.a2;
+					shift(pnt1,-8);shift(pnt2,-8);ct--;
+					*(INT_B*)pnt1=*(INT_B*)pnt2;
 				}while(ct>0);
 			}
 			ct=size/4;
 			if(ct>0){size=size%4;
 				do{
-					shift(adr.a1,-4);shift(adr.a2,-4);ct--;
-					*(INT_L*)adr.a1=*(INT_L*)adr.a2;
+					shift(pnt1,-4);shift(pnt2,-4);ct--;
+					*(INT_L*)pnt1=*(INT_L*)pnt2;
 				}while(ct>0);
 			}
 			ct=size/2;
 			if(ct>0){size=size%2;
 				do{
-					shift(adr.a1,-2);shift(adr.a2,-2);ct--;
-					*(INT_W*)adr.a1=*(INT_W*)adr.a2;
+					shift(pnt1,-2);shift(pnt2,-2);ct--;
+					*(INT_W*)pnt1=*(INT_W*)pnt2;
 				}while(ct>0);
 			}
 			if(size>0){ct=size;
 				do{
-					shift(adr.a1,-1);shift(adr.a2,-1);ct--;
-					*(BYTE*)adr.a1=*(BYTE*)adr.a2;
+					shift(pnt1,-1);shift(pnt2,-1);ct--;
+					*(BYTE*)pnt1=*(BYTE*)pnt2;
 				}while(ct>0);
 			}
 		}
 	}
-	/** РЎСЂР°РІРЅРµРЅРёРµ РїР°РјСЏС‚Рё */
-	LOGIC compare(POINTER a1,POINTER a2,INT_W size){
+	/** Копирование в памяти
+	 * @param adr двойной адрес
+	 * @param size размер */
+	void copy(Addrs &adr,INT_M size){
+		copy(adr.a1,adr.a2,size);
+	}
+	/** Сравнение памяти
+	 * @param pnt1 указатель адреса 1
+	 * @param pnt2 указатель адреса 2
+	 * @param size размер\\длинна */
+	LOGIC compare(POINTER pnt1,POINTER pnt2,INT_W size){
 		LOGIC res=true;
 		while(size>0){
 			if(size>=8){
-				if(*(INT_B*)a1!=*(INT_B*)a2)res=false;
-				else{shift(a1,8);shift(a2,8);size-=8;}
+				if(*(INT_B*)pnt1!=*(INT_B*)pnt2)res=false;
+				else{shift(pnt1,8);shift(pnt2,8);size-=8;}
 			}else if(size>=4){
-				if(*(INT_L*)a1!=*(INT_L*)a2)res=false;
-				else{shift(a1,4);shift(a2,4);size-=4;}
+				if(*(INT_L*)pnt1!=*(INT_L*)pnt2)res=false;
+				else{shift(pnt1,4);shift(pnt2,4);size-=4;}
 			}else if(size>=2){
-				if(*(INT_W*)a1!=*(INT_W*)a2)res=false;
-				else{shift(a1,2);shift(a2,2);size-=2;}
+				if(*(INT_W*)pnt1!=*(INT_W*)pnt2)res=false;
+				else{shift(pnt1,2);shift(pnt2,2);size-=2;}
 			}else{
-				if(*(BYTE*)a1!=*(BYTE*)a2)res=false;
-				else{shift(a1,1);shift(a2,1);size-=1;}
+				if(*(BYTE*)pnt1!=*(BYTE*)pnt2)res=false;
+				else{shift(pnt1,1);shift(pnt2,1);size-=1;}
 			}
 			if(!res)break;
 		}
 		return res;
 	}
-	/** Р’Р°Р»РёРґР°С†РёСЏ РёРЅРґРµРєСЃР° */
+	/** Валидация индекса
+	 * @param index индекс
+	 * @param size размер массива */
 	void index(INT_W &index,INT_W size){
 		if(index>0){
 			if(index<=size)index--;
@@ -227,7 +253,9 @@ namespace t {
 			}
 		}
 	}
-	/** Р’Р°Р»РёРґР°С†РёСЏ РёРЅРґРµРєСЃР° */
+	/** Валидация индекса
+	 * @param index индекс
+	 * @param size размер массива	*/
 	void index(INT_L &index,INT_L size){
 		if(index>0){
 			if(index<=size)index--;
@@ -238,29 +266,35 @@ namespace t {
 			}
 		}
 	}
-	/** Р Р°СЃС‡С‘С‚ РѕР±СЉС‘РјР° РѕС‚ СЂР°Р·РјРµСЂР° Рё СЂРµР·РµСЂРІР° */
+	/** Расчёт объёма от размера и резерва
+	 * @param sz текущий размер
+	 * @param mr резерв памяти
+	 * @return значение объёма */
 	INT_W volume(INT_W sz,INT_W mr){
 		INT_L res=mr+(sz/mr)*mr;
 		if(res>65535)res=65535;
 		return res;
 	}
-	/** Р Р°СЃС‡С‘С‚ РѕР±СЉС‘РјР° РѕС‚ СЂР°Р·РјРµСЂР° Рё СЂРµР·РµСЂРІР° */
+	/** Расчёт объёма от размера и резерва
+	 * @param sz текущий размер
+	 * @param mr резерв памяти
+	 * @return значение объёма */
 	INT_L volume(INT_L sz,INT_W mr){
 		INT_B res=mr+(sz/mr)*mr;
 		if(res>4294967295)res=4294967295;
 		return res;
 	}
-	/** РџРѕР»СѓС‡РµРЅРёРµ РґР»РёРЅРЅС‹ РјР°СЃСЃРёРІР° СЃРёРјРІРѕР»РѕРІ */
+	/** Получение длинны массива символов
+	 * @param ltr массив символов
+	 * @return размер массива символов */
 	INT_W lsize(CHARS(ltr)){
 		INT_W sz=0;
-		while(ltr[sz]!='\0'){
-			sz++;if(sz==65535)break;
-		}
+		while(ltr[sz]!='\0'){sz++;if(sz==65535)break;}
 		return sz;
 	}
-	
 }
-/** РЎС‚СЂРѕРєР° */
+
+/** Строка */
 class STRING {
 struct Data {
 	INT_W mr=0,sz=0,tl=0;
@@ -285,8 +319,10 @@ struct Data {
 			}else{
 				if(mdt->tl<sz)sz=mdt->tl;
 			}
-			Addrs adr={(POINTER)mdt->str,pnt};
-			t::copy(adr,sz);*(BYTE*)adr.a1=0;
+			//Addrs adr={(POINTER)mdt->str,pnt};
+			//t::copy(adr,sz);*(BYTE*)adr.a1=0;
+			POINTER adr=mdt->str;
+			t::copy(adr,pnt,sz);*(BYTE*)adr=0;
 			if(mdt->sz!=sz)mdt->sz=sz;
 		}
 	}
@@ -335,7 +371,7 @@ public:
 	INT_W Size(){return mdt->sz;}
 	INT_W Total(){return mdt->tl;}
 	INT_W Reserve(){return mdt->mr;}
-	//void Reserve(INT_W mr){mdt->mr=mr;}// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ???
+	//void Reserve(INT_W mr){mdt->mr=mr;}// ???
 	void Init(INT_W tl=0,INT_W mr=0){
 		if(this->dbl){
 			mdt=new Data;dbl=false;
@@ -415,7 +451,7 @@ public:
 	#endif
 };
 
-/** Р”Р°С‚Р°Р’СЂРµРјСЏ */
+/** ДатаВремя */
 class DATETIME {
 private:
 	time_t dtm;
@@ -445,31 +481,32 @@ public:
 		udt.stm=*localtime(&this->dtm);
 		return udt.dtm;
 	}
-	STRING Format(STRING fmt,BYTE sz=64){
+	STRING Format(STRING fmt="%Y.%m.%d %H:%M:%S",BYTE sz=64){
 		LETTER res[sz];
 		strftime(res,sz,*fmt,localtime(&this->dtm));
 		return STRING(res);
 	}
-	STRING Format(){
-		LETTER res[64];
-		strftime(res,64,"%Y.%m.%d %H:%M:%S",localtime(&this->dtm));
-		return STRING(res);
-	}
 };
 
+/** Пространство имёт от _types */
 namespace t{
+	/** Все основные типы данных */
 	template <typename dTYPE>
 	constexpr bool isBaseA=IsMatch<dTYPE,LOGIC,LETTER,RANGE,BYTE,INT_S,INT_W,INT_M,INT_L,INT_T,INT_B,FLOAT,DOUBLE,POINTER,DATETIME,STRING>::v;
+	/** Основные типы данных */
 	template <typename dTYPE>
 	constexpr bool isBaseB=IsMatch<dTYPE,LOGIC,LETTER,RANGE,BYTE,INT_S,INT_W,INT_M,INT_L,INT_T,INT_B,FLOAT,DOUBLE,POINTER>::v;
 };
 
+/** Структура типа по Id */
 template<INT_W> struct ById;
+/** Структура типа Id и Name */
 template<typename dTYPE> struct Type {
 	static const INT_W Id=0;
 	static constexpr char Name[]="UNKNOWN";
 };
 
+/** Добавление ID типа */
 #define ID_TYPE(nID,dTYPE) \
 template<> struct ById<nID> {typedef dTYPE type;};\
 template<> struct Type<dTYPE> {\
@@ -493,7 +530,7 @@ ID_TYPE(13,POINTER)
 ID_TYPE(14,DATETIME)
 ID_TYPE(15,STRING)
 
-/* РЎСЃС‹Р»РєР° */
+/* Ссылка */
 class LINK {
 private:
 	INT_W idt,vsz;
@@ -528,6 +565,7 @@ public:
 };
 ID_TYPE(16,LINK)
 
+/** Любой тип */
 class ANY {
 struct Data {
 	INT_W idt;
@@ -549,13 +587,13 @@ struct Data {
 				case 7:	delete static_cast<INT_M*>(mdt->pnt);break;
 				case 8:	delete static_cast<INT_L*>(mdt->pnt);break;
 				case 9:	delete static_cast<INT_T*>(mdt->pnt);break;
-				case 10:	delete static_cast<INT_B*>(mdt->pnt);break;
-				case 11:	delete static_cast<FLOAT*>(mdt->pnt);break;
-				case 12:	delete static_cast<DOUBLE*>(mdt->pnt);break;
-				case 13:	delete static_cast<POINTER*>(mdt->pnt);break;
-				case 14:	delete static_cast<DATETIME*>(mdt->pnt);break;
-				case 15:	delete static_cast<STRING*>(mdt->pnt);break;
-				default:	delete static_cast<LINK*>(mdt->pnt);
+				case 10:delete static_cast<INT_B*>(mdt->pnt);break;
+				case 11:delete static_cast<FLOAT*>(mdt->pnt);break;
+				case 12:delete static_cast<DOUBLE*>(mdt->pnt);break;
+				case 13:delete static_cast<POINTER*>(mdt->pnt);break;
+				case 14:delete static_cast<DATETIME*>(mdt->pnt);break;
+				case 15:delete static_cast<STRING*>(mdt->pnt);break;
+				default:delete static_cast<LINK*>(mdt->pnt);
 			}
 			mdt->pnt=NULL;
 		}
@@ -604,13 +642,13 @@ public:
 			case 7:	*this=(INT_M)obj;break;
 			case 8:	*this=(INT_L)obj;break;
 			case 9:	*this=(INT_T)obj;break;
-			case 10:	*this=(INT_B)obj;break;
-			case 11:	*this=(FLOAT)obj;break;
-			case 12:	*this=(DOUBLE)obj;break;
-			case 13:	*this=(POINTER)obj;break;
-			case 14:	*this=(DATETIME)obj;break;
-			case 15:	*this=(STRING)obj;break;
-			default:	*this=*(LINK*)obj.mdt->pnt;
+			case 10:*this=(INT_B)obj;break;
+			case 11:*this=(FLOAT)obj;break;
+			case 12:*this=(DOUBLE)obj;break;
+			case 13:*this=(POINTER)obj;break;
+			case 14:*this=(DATETIME)obj;break;
+			case 15:*this=(STRING)obj;break;
+			default:*this=*(LINK*)obj.mdt->pnt;
 		}
 		return *this;
 	}
@@ -642,13 +680,13 @@ public:
 				case 7:	out<<*(INT_M*)obj.mdt->pnt;break;
 				case 8:	out<<*(INT_L*)obj.mdt->pnt;break;
 				case 9:	out<<*(INT_T*)obj.mdt->pnt;break;
-				case 10:	out<<*(INT_B*)obj.mdt->pnt;break;
-				case 11:	out<<*(FLOAT*)obj.mdt->pnt;break;
-				case 12:	out<<*(DOUBLE*)obj.mdt->pnt;break;
-				case 13:	out<<*(POINTER*)obj.mdt->pnt;break;
-				case 14:	out<<*(DATETIME*)obj.mdt->pnt;break;
-				case 15:	out<<*(STRING*)obj.mdt->pnt;break;
-				default:	out<<(*(LINK*)obj.mdt->pnt).Type();
+				case 10:out<<*(INT_B*)obj.mdt->pnt;break;
+				case 11:out<<*(FLOAT*)obj.mdt->pnt;break;
+				case 12:out<<*(DOUBLE*)obj.mdt->pnt;break;
+				case 13:out<<*(POINTER*)obj.mdt->pnt;break;
+				case 14:out<<*(DATETIME*)obj.mdt->pnt;break;
+				case 15:out<<*(STRING*)obj.mdt->pnt;break;
+				default:out<<(*(LINK*)obj.mdt->pnt).Type();
 			}
 		}else out << "NULL";
 		return out;

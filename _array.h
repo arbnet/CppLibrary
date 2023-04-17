@@ -1,13 +1,16 @@
-/** РњР°СЃСЃРёРІС‹ */
+// Массивы
+
 #ifndef FILE_array
 
 #include "_types.h"
 
+/** Структура КлючЗначение */
 struct KeyValue {
 	STRING key;
 	ANY value;
 };
 
+/** Массив */
 template <typename dTYPE>
 class Array {
 struct Data {
@@ -128,6 +131,7 @@ ID_TYPE(33,Array<POINTER>)
 ID_TYPE(34,Array<DATETIME>)
 ID_TYPE(35,Array<STRING>)
 
+/** Аргументы */
 class Args {
 private:
 	Array<POINTER> *apr;
@@ -197,6 +201,7 @@ public:
 };
 ID_TYPE(17,Args)
 
+/** Ассоциативный массив */
 class Associative {
 private:
 	Array<POINTER> *apr;
