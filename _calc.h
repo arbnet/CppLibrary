@@ -67,10 +67,11 @@ namespace c {
 	/** Получение шестнадтиричного значения байта
 	 * @param b байт 
 	 * @return HEX значение	*/
-	STRING Hex(BYTE b){
-		LETTER s[]="0123456789ABCDEF";
-		LETTER h[3]={s[b/16],s[b%16],'\0'};
-		return STRING(h);
+	STRING Hex(BYTE b,LOGIC sg=false){
+		STRING st(16);
+  	st="0123456789";st+=sg?"ABCDEF":"abcdef";
+		LETTER hx[3]={st[1+b/16],st[1+b%16],'\0'};
+		return STRING(hx);
 	}
 }
 

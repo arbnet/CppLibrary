@@ -1,48 +1,37 @@
-// Типы данных
+/** РўРёРїС‹ РґР°РЅРЅС‹С…
+ * Р‘РёР±Р»РёРѕС‚РµРєР° OWNI */
 
 #ifndef FILE_types
 
+#include <string>
 #include "time.h"
+using namespace std;
 
-/** Логический тип 0..1 */
-typedef bool LOGIC;
-/** Буква */
-typedef char LETTER;
-/** Диапазон -128..127 */
-typedef __INT8_TYPE__ RANGE;
-/** Байт 0..255 */
-typedef __UINT8_TYPE__ BYTE;
-/** Целое число
- * -32768..32767 */
-typedef __INT16_TYPE__ INT_S;
-/** Целое число
- * 0..65535 */
-typedef __UINT16_TYPE__ INT_W;
-/** Целое число
- * -2147483648..2147483647 */
-typedef __INT32_TYPE__ INT_M;
-/** Целое число
- * 0..4294967295 */
-typedef __UINT32_TYPE__ INT_L;
-/** Целое число
- * -9223372036854775808..9223372036854775807 */
-typedef __INT64_TYPE__ INT_T;
-/** Целое число
- * 0..18446744073709551615 */
-typedef __UINT64_TYPE__ INT_B;
-/** Плавающее число
- * 1.8E-38..1.8E+38		32b точность 6 .3 знаков */
-typedef float FLOAT;
-/** Плавающее число двойной точности
- * 2.2E-308..1.8E+308	64b	точность 15 .6 знаков */
-typedef double DOUBLE;
-/** Указатель */
-typedef void* POINTER;
+/** РџСѓСЃС‚С‹Рµ РјР°РєСЂРѕСЃС‹ _error */
+#ifndef FILE_error
+#define FIX
+#define TRY
+#define CATCH
+#endif
 
-/** Массив символов */
+typedef bool LOGIC;// Р›РѕРіРёС‡РµСЃРєРёР№ С‚РёРї 0..1
+typedef char LETTER;// Р‘СѓРєРІР°
+typedef __INT8_TYPE__ RANGE;// Р”РёР°РїР°Р·РѕРЅ -128..127
+typedef __UINT8_TYPE__ BYTE;// Р‘Р°Р№С‚ 0..255
+typedef __INT16_TYPE__ INT_S;// Р¦РµР»РѕРµ С‡РёСЃР»Рѕ -32768..32767
+typedef __UINT16_TYPE__ INT_W;// Р¦РµР»РѕРµ С‡РёСЃР»Рѕ 0..65535
+typedef __INT32_TYPE__ INT_M;// Р¦РµР»РѕРµ С‡РёСЃР»Рѕ -2147483648..2147483647
+typedef __UINT32_TYPE__ INT_L;// Р¦РµР»РѕРµ С‡РёСЃР»Рѕ 0..4294967295
+typedef __INT64_TYPE__ INT_T;// Р¦РµР»РѕРµ С‡РёСЃР»Рѕ -9223372036854775808..9223372036854775807
+typedef __UINT64_TYPE__ INT_B;// Р¦РµР»РѕРµ С‡РёСЃР»Рѕ 0..18446744073709551615
+typedef float FLOAT;// РџР»Р°РІР°СЋС‰РµРµ С‡РёСЃР»Рѕ 1.8E-38..1.8E+38		32b С‚РѕС‡РЅРѕСЃС‚СЊ 6 .3 Р·РЅР°РєРѕРІ
+typedef double DOUBLE;// РџР»Р°РІР°СЋС‰РµРµ С‡РёСЃР»Рѕ РґРІРѕР№РЅРѕР№ С‚РѕС‡РЅРѕСЃС‚Рё 2.2E-308..1.8E+308	64b	С‚РѕС‡РЅРѕСЃС‚СЊ 15 .6 Р·РЅР°РєРѕРІ
+typedef void* POINTER;// РЈРєР°Р·Р°С‚РµР»СЊ
+
+/** РњР°СЃСЃРёРІ СЃРёРјРІРѕР»РѕРІ */
 #define CHARS(ltr) const char ltr[]
 
-/** Структура битов .b0..b7 */
+/** РЎС‚СЂСѓРєС‚СѓСЂР° Р±РёС‚РѕРІ .b0..b7 */
 struct Bits {
 	unsigned b0:1;
 	unsigned b1:1;
@@ -53,7 +42,8 @@ struct Bits {
 	unsigned b6:1;
 	unsigned b7:1;
 };
-/** Структура байтов .b0..b7 */
+
+/** РЎС‚СЂСѓРєС‚СѓСЂР° Р±Р°Р№С‚РѕРІ .b0..b7 */
 struct Bytes {
 	BYTE b0;
 	BYTE b1;
@@ -64,12 +54,8 @@ struct Bytes {
 	BYTE b6;
 	BYTE b7;
 };
-/** Структура адреса .a1.a2 */
-struct Addrs {
-	POINTER a1;
-	POINTER a2;
-};
-/** Структура даты-времени */
+
+/** РЎС‚СЂСѓРєС‚СѓСЂР° РґР°С‚С‹-РІСЂРµРјРµРЅРё */
 struct DateTime {
 	int seconds;
 	int minutes;
@@ -81,231 +67,247 @@ struct DateTime {
 	int yday;
 	int summer;
 };
-/** Союз BYTE & Bits */
+
+/** РЎРѕСЋР· BYTE & Bits */
 union Code {
 	BYTE byte;
 	Bits bit;
 };
-/** Союз INT_B & Bytes */
+
+/** РЎРѕСЋР· INT_B & Bytes */
 union Block {
 	INT_B numb;
 	Bytes byte;
 };
-/** Союз tm & DateTime */
+
+/** РЎРѕСЋР· tm & DateTime */
 union DatetimeU {
 	struct tm stm;
 	DateTime dtm;
 };
 
-/** Пространство имёт от _types */
+/** РџСЂРѕСЃС‚СЂР°РЅСЃС‚РІРѕ РёРјС‘С‚ РѕС‚ _types */
 namespace t {
-	/** Проверка на тип\класс */
+	/** РџСЂРѕРІРµСЂРєР° РЅР° С‚РёРї\РєР»Р°СЃСЃ */
 	template <bool tBool, class oCLASS=void>
 	struct IfType {};
 	template <class oCLASS>
 	struct IfType<true, oCLASS> {typedef oCLASS type;};
-	/** Включение в компиляцию */
+	/** Р’РєР»СЋС‡РµРЅРёРµ РІ РєРѕРјРїРёР»СЏС†РёСЋ */
 	template <bool tBool, class oCLASS=void>
 	using Enable = typename IfType<tBool,oCLASS>::type;
-	/** Сравнение типов */
+	/** РЎСЂР°РІРЅРµРЅРёРµ С‚РёРїРѕРІ */
 	template <typename T1,typename T2>
 	struct Match {static const bool v=false;};
 	template <typename T0>
 	struct Match<T0,T0> {static const bool v=true;};
-	/** Ниличие типа в перечне */
+	/** РќРёР»РёС‡РёРµ С‚РёРїР° РІ РїРµСЂРµС‡РЅРµ */
 	template <typename dTYPE, typename ...aTYPE>
 	struct IsMatch{static constexpr bool v{(Match<dTYPE,aTYPE>::v || ...)};};
 
-	/** Поменять местами переменные
-	 * @param var1 переменная 1
-	 * @param var2 переменная 2	*/
+	/** РџРѕРјРµРЅСЏС‚СЊ РјРµСЃС‚Р°РјРё РїРµСЂРµРјРµРЅРЅС‹Рµ
+	 * @param var1 РїРµСЂРµРјРµРЅРЅР°СЏ 1
+	 * @param var2 РїРµСЂРµРјРµРЅРЅР°СЏ 2	*/
 	template <typename dTYPE>
-	void swap(dTYPE &var1, dTYPE &var2){
+	void Swap(dTYPE &var1, dTYPE &var2){
 		dTYPE tmp(var1);var1=var2;var2=tmp;
 	}
-	/** Сдвиг указателя
-	 * @param pnt указатель
-	 * @param shift смещение */
+	/** РЎРґРІРёРі СѓРєР°Р·Р°С‚РµР»СЏ
+	 * @param pnt СѓРєР°Р·Р°С‚РµР»СЊ
+	 * @param shift СЃРјРµС‰РµРЅРёРµ */
 	template <typename dTYPE>
-	void shift(dTYPE* &pnt,INT_S shift=1){
+	void Shift(dTYPE* &pnt,INT_S shift=1){
 		pnt+=shift;
 	}
-	/** Сдвиг указателя
-	 * @param pnt указатель
-	 * @param shift смещение */
-	void shift(POINTER &pnt,INT_S shift=1){
+	/** РЎРґРІРёРі СѓРєР°Р·Р°С‚РµР»СЏ
+	 * @param pnt СѓРєР°Р·Р°С‚РµР»СЊ
+	 * @param shift СЃРјРµС‰РµРЅРёРµ */
+	void Shift(POINTER &pnt,INT_S shift=1){
 		pnt=(POINTER*)((INT_B)pnt+shift);
 	}
-	/** Заполнение памяти значением
-	 * @param pnt указатель адреса
-	 * @param size размер\\длинна
-	 * @param val значение */
+	/** Р—Р°РїРѕР»РЅРµРЅРёРµ РїР°РјСЏС‚Рё Р·РЅР°С‡РµРЅРёРµРј
+	 * @param pnt СѓРєР°Р·Р°С‚РµР»СЊ Р°РґСЂРµСЃР°
+	 * @param size СЂР°Р·РјРµСЂ\\РґР»РёРЅРЅР°
+	 * @param val Р·РЅР°С‡РµРЅРёРµ */
 	template <typename dTYPE=BYTE>
-	void fill(POINTER &pnt,INT_W size,dTYPE val=0){
+	void Fill(POINTER &pnt,INT_W size,dTYPE val=0){
 		while(size>0){
-			*(dTYPE*)pnt=val;shift(pnt,sizeof(dTYPE));size--;
+			*(dTYPE*)pnt=val;Shift(pnt,sizeof(dTYPE));size--;
 		}
 	}
-	/** Копирование в памяти
-	 * @param pnt1 указатель адреса 1
-	 * @param pnt2 указатель адреса 2
-	 * @param size размер */
-	void copy(POINTER &pnt1,POINTER &pnt2,INT_M size){
+	/** РљРѕРїРёСЂРѕРІР°РЅРёРµ РІ РїР°РјСЏС‚Рё
+	 * @param pnt1 СѓРєР°Р·Р°С‚РµР»СЊ Р°РґСЂРµСЃР° 1
+	 * @param pnt2 СѓРєР°Р·Р°С‚РµР»СЊ Р°РґСЂРµСЃР° 2
+	 * @param size СЂР°Р·РјРµСЂ */
+	void Copy(POINTER &pnt1,POINTER &pnt2,INT_M size){
 		INT_W ct;
 		if(size>0){
 			ct=size/8;
 			if(ct>0){size=size%8;
 				do{
 					*(INT_B*)pnt1=*(INT_B*)pnt2;
-					shift(pnt1,8);shift(pnt2,8);ct--;
+					Shift(pnt1,8);Shift(pnt2,8);ct--;
 				}while(ct>0);
 			}
 			ct=size/4;
 			if(ct>0){size=size%4;
 				do{
 					*(INT_L*)pnt1=*(INT_L*)pnt2;
-					shift(pnt1,4);shift(pnt2,4);ct--;
+					Shift(pnt1,4);Shift(pnt2,4);ct--;
 				}while(ct>0);
 			}
 			ct=size/2;
 			if(ct>0){size=size%2;
 				do{
 					*(INT_W*)pnt1=*(INT_W*)pnt2;
-					shift(pnt1,2);shift(pnt2,2);ct--;
+					Shift(pnt1,2);Shift(pnt2,2);ct--;
 				}while(ct>0);
 			}
 			if(size>0){ct=size;
 				do{
 					*(BYTE*)pnt1=*(BYTE*)pnt2;
-					shift(pnt1,1);shift(pnt2,1);ct--;
+					Shift(pnt1,1);Shift(pnt2,1);ct--;
 				}while(ct>0);
 			}
 		}else{size=-size;
 			ct=size/8;
 			if(ct>0){size=size%8;
 				do{
-					shift(pnt1,-8);shift(pnt2,-8);ct--;
+					Shift(pnt1,-8);Shift(pnt2,-8);ct--;
 					*(INT_B*)pnt1=*(INT_B*)pnt2;
 				}while(ct>0);
 			}
 			ct=size/4;
 			if(ct>0){size=size%4;
 				do{
-					shift(pnt1,-4);shift(pnt2,-4);ct--;
+					Shift(pnt1,-4);Shift(pnt2,-4);ct--;
 					*(INT_L*)pnt1=*(INT_L*)pnt2;
 				}while(ct>0);
 			}
 			ct=size/2;
 			if(ct>0){size=size%2;
 				do{
-					shift(pnt1,-2);shift(pnt2,-2);ct--;
+					Shift(pnt1,-2);Shift(pnt2,-2);ct--;
 					*(INT_W*)pnt1=*(INT_W*)pnt2;
 				}while(ct>0);
 			}
 			if(size>0){ct=size;
 				do{
-					shift(pnt1,-1);shift(pnt2,-1);ct--;
+					Shift(pnt1,-1);Shift(pnt2,-1);ct--;
 					*(BYTE*)pnt1=*(BYTE*)pnt2;
 				}while(ct>0);
 			}
 		}
 	}
-	/** Копирование в памяти
-	 * @param adr двойной адрес
-	 * @param size размер */
-	void copy(Addrs &adr,INT_M size){
-		copy(adr.a1,adr.a2,size);
-	}
-	/** Сравнение памяти
-	 * @param pnt1 указатель адреса 1
-	 * @param pnt2 указатель адреса 2
-	 * @param size размер\\длинна */
-	LOGIC compare(POINTER pnt1,POINTER pnt2,INT_W size){
+	/** РЎСЂР°РІРЅРµРЅРёРµ РїР°РјСЏС‚Рё
+	 * @param pnt1 СѓРєР°Р·Р°С‚РµР»СЊ Р°РґСЂРµСЃР° 1
+	 * @param pnt2 СѓРєР°Р·Р°С‚РµР»СЊ Р°РґСЂРµСЃР° 2
+	 * @param size СЂР°Р·РјРµСЂ\\РґР»РёРЅРЅР° */
+	LOGIC Compare(POINTER pnt1,POINTER pnt2,INT_W size){
 		LOGIC res=true;
 		while(size>0){
 			if(size>=8){
 				if(*(INT_B*)pnt1!=*(INT_B*)pnt2)res=false;
-				else{shift(pnt1,8);shift(pnt2,8);size-=8;}
+				else{Shift(pnt1,8);Shift(pnt2,8);size-=8;}
 			}else if(size>=4){
 				if(*(INT_L*)pnt1!=*(INT_L*)pnt2)res=false;
-				else{shift(pnt1,4);shift(pnt2,4);size-=4;}
+				else{Shift(pnt1,4);Shift(pnt2,4);size-=4;}
 			}else if(size>=2){
 				if(*(INT_W*)pnt1!=*(INT_W*)pnt2)res=false;
-				else{shift(pnt1,2);shift(pnt2,2);size-=2;}
+				else{Shift(pnt1,2);Shift(pnt2,2);size-=2;}
 			}else{
 				if(*(BYTE*)pnt1!=*(BYTE*)pnt2)res=false;
-				else{shift(pnt1,1);shift(pnt2,1);size-=1;}
+				else{Shift(pnt1,1);Shift(pnt2,1);size-=1;}
 			}
 			if(!res)break;
 		}
 		return res;
 	}
-	/** Валидация индекса
-	 * @param index индекс
-	 * @param size размер массива */
-	void index(INT_W &index,INT_W size){
+	/** Р’Р°Р»РёРґР°С†РёСЏ РёРЅРґРµРєСЃР°
+	 * @param index РёРЅРґРµРєСЃ
+	 * @param size СЂР°Р·РјРµСЂ РјР°СЃСЃРёРІР° */
+	void Index(INT_W &index,INT_W size){
 		if(index>0){
-			if(index<=size)index--;
-			else{index=~index+1;
-				if(index<=size)index=size-index;
-				else if(size>0)index=size-1;
-				else index=0;
-			}
+			if(size>0){
+				if(index<=size)index--;
+				else{index=~index+1;
+					if(index<=size)index=size-index;
+					else index=size-1;
+				}
+			}else index=0;
 		}
 	}
-	/** Валидация индекса
-	 * @param index индекс
-	 * @param size размер массива	*/
-	void index(INT_L &index,INT_L size){
+	/** Р’Р°Р»РёРґР°С†РёСЏ РёРЅРґРµРєСЃР°
+	 * @param index РёРЅРґРµРєСЃ
+	 * @param size СЂР°Р·РјРµСЂ РјР°СЃСЃРёРІР°	*/
+	void Index(INT_L &index,INT_L size){
 		if(index>0){
-			if(index<=size)index--;
-			else{index=~index+1;
-				if(index<=size)index=size-index;
-				else if(size>0)index=size-1;
-				else index=0;
-			}
+			if(size>0){
+				if(index<=size)index--;
+				else{index=~index+1;
+					if(index<=size)index=size-index;
+					else index=size-1;
+				}
+			}else index=0;
 		}
 	}
-	/** Расчёт объёма от размера и резерва
-	 * @param sz текущий размер
-	 * @param mr резерв памяти
-	 * @return значение объёма */
-	INT_W volume(INT_W sz,INT_W mr){
+	/** Р Р°СЃС‡С‘С‚ РѕР±СЉС‘РјР° РѕС‚ СЂР°Р·РјРµСЂР° Рё СЂРµР·РµСЂРІР°
+	 * @param sz С‚РµРєСѓС‰РёР№ СЂР°Р·РјРµСЂ
+	 * @param mr СЂРµР·РµСЂРІ РїР°РјСЏС‚Рё
+	 * @return Р·РЅР°С‡РµРЅРёРµ РѕР±СЉС‘РјР° */
+	INT_W Volume(INT_W sz,INT_W mr){
 		INT_L res=mr+(sz/mr)*mr;
 		if(res>65535)res=65535;
 		return res;
 	}
-	/** Расчёт объёма от размера и резерва
-	 * @param sz текущий размер
-	 * @param mr резерв памяти
-	 * @return значение объёма */
-	INT_L volume(INT_L sz,INT_W mr){
+	/** Р Р°СЃС‡С‘С‚ РѕР±СЉС‘РјР° РѕС‚ СЂР°Р·РјРµСЂР° Рё СЂРµР·РµСЂРІР°
+	 * @param sz С‚РµРєСѓС‰РёР№ СЂР°Р·РјРµСЂ
+	 * @param mr СЂРµР·РµСЂРІ РїР°РјСЏС‚Рё
+	 * @return Р·РЅР°С‡РµРЅРёРµ РѕР±СЉС‘РјР° */
+	INT_L Volume(INT_L sz,INT_W mr){
 		INT_B res=mr+(sz/mr)*mr;
 		if(res>4294967295)res=4294967295;
 		return res;
 	}
-	/** Получение длинны массива символов
-	 * @param ltr массив символов
-	 * @return размер массива символов */
-	INT_W lsize(CHARS(ltr)){
+	/** РџРѕР»СѓС‡РµРЅРёРµ РґР»РёРЅРЅС‹ РјР°СЃСЃРёРІР° СЃРёРјРІРѕР»РѕРІ
+	 * @param ltr РјР°СЃСЃРёРІ СЃРёРјРІРѕР»РѕРІ
+	 * @return СЂР°Р·РјРµСЂ РјР°СЃСЃРёРІР° СЃРёРјРІРѕР»РѕРІ */
+	INT_W Lsize(CHARS(ltr)){
 		INT_W sz=0;
 		while(ltr[sz]!='\0'){sz++;if(sz==65535)break;}
 		return sz;
 	}
+	/** РџРѕР»СѓС‡РёС‚СЊ Р·РЅР°С‡РµРЅРёРµ \\РѕР±СЉРµРєС‚ РёР· СѓРєР°Р·Р°С‚РµР»СЏ
+	 * @param pnt СѓРєР°Р·Р°С‚РµР»СЊ
+	 * @return Р·РЅР°С‡РµРЅРёРµ\\РѕР±СЉРµРєС‚ */
+	template<typename dTYPE>
+	dTYPE FromPointer(POINTER pnt){
+		return *(dTYPE*)pnt;
+	}
 }
 
-/** Строка */
+/** РЎС‚СЂРѕРєР° */
 class STRING {
 struct Data {
 	INT_W mr=0,sz=0,tl=0;
 	LETTER* str=NULL;
 };
+private:
 	Data *mdt;
 	LOGIC dbl=false;
+	void Init(INT_W tl=0,INT_W mr=0){
+		if(this->dbl){
+			mdt=new Data;dbl=false;
+		}else if(mdt->str){
+			delete []mdt->str;mdt->sz=0;
+		}
+		mdt->tl=tl;mdt->mr=mr;
+		mdt->str=new LETTER[INT_L(tl+1)];
+	}
 	LETTER* Change(INT_W sz){
 		LETTER* str=NULL;
 		if(mdt->mr){
-			INT_W ntx=t::volume(sz,mdt->mr);
+			INT_W ntx=t::Volume(sz,mdt->mr);
 			if(mdt->tl!=ntx){
 				mdt->tl=ntx;str=new LETTER[INT_L(ntx+1)];
 			}
@@ -313,21 +315,18 @@ struct Data {
 		return str;
 	}
 	void Assign(POINTER pnt,INT_W sz){
-		if(sz){
-			if(LETTER* str=this->Change(sz)){
-				delete []mdt->str;mdt->str=str;
-			}else{
-				if(mdt->tl<sz)sz=mdt->tl;
-			}
-			//Addrs adr={(POINTER)mdt->str,pnt};
-			//t::copy(adr,sz);*(BYTE*)adr.a1=0;
-			POINTER adr=mdt->str;
-			t::copy(adr,pnt,sz);*(BYTE*)adr=0;
-			if(mdt->sz!=sz)mdt->sz=sz;
+		if(LETTER* str=this->Change(sz)){
+			delete []mdt->str;mdt->str=str;
+		}else{
+			if(mdt->tl<sz)sz=mdt->tl;
 		}
+		POINTER adr=mdt->str;
+		if(sz)t::Copy(adr,pnt,sz);
+		*(BYTE*)adr=0;
+		if(mdt->sz!=sz)mdt->sz=sz;
 	}
 	LOGIC Compare(POINTER pnt,INT_W sz){
-		return mdt->sz==sz?t::compare(mdt->str,pnt,sz):false;
+		return mdt->sz==sz?t::Compare(mdt->str,pnt,sz):false;
 	}
 public:
 	STRING(const STRING &obj): mdt(obj.mdt),dbl(true){}
@@ -335,7 +334,7 @@ public:
 		this->mdt=new Data;if(!tl && !mr)mr=32;this->Init(tl,mr);
 	}
 	STRING(CHARS(ltr)){
-		INT_W sz=t::lsize(ltr);
+		INT_W sz=t::Lsize(ltr);
 		this->mdt=new Data;this->Init(sz,sz?0:32);
 		this->Assign((POINTER)ltr,sz);
 	}
@@ -343,11 +342,11 @@ public:
 	operator bool(){return mdt->sz?true:false;}
 	const LETTER* operator*(){return mdt->str;}
 	LETTER& operator[](INT_L index){
-		t::index(index,mdt->sz);
+		t::Index(index,mdt->sz);
 		return mdt->str[index];
 	}
 	STRING& operator=(const LETTER *ltr){
-		this->Assign((POINTER)ltr,t::lsize(ltr));
+		this->Assign((POINTER)ltr,t::Lsize(ltr));
 		return *this;
 	}
 	STRING& operator=(const STRING &obj){
@@ -371,37 +370,29 @@ public:
 	INT_W Size(){return mdt->sz;}
 	INT_W Total(){return mdt->tl;}
 	INT_W Reserve(){return mdt->mr;}
-	//void Reserve(INT_W mr){mdt->mr=mr;}// ???
-	void Init(INT_W tl=0,INT_W mr=0){
-		if(this->dbl){
-			mdt=new Data;dbl=false;
-		}else if(mdt->str){
-			delete []mdt->str;mdt->sz=0;
-		}
-		mdt->tl=tl;mdt->mr=mr;
-		mdt->str=new LETTER[INT_L(tl+1)];
-	}
+	void Reserve(INT_W mr){mdt->mr=mr;}
 	void Put(const STRING &obj,INT_W index=0){
 		if(INT_W sz=obj.mdt->sz){
 			if(INT_L(mdt->sz+sz)>(mdt->mr?65535:mdt->tl))
 				sz=(mdt->mr?65535:mdt->tl)-mdt->sz;
 			if(sz){
-				Addrs adr;POINTER pnt;
+				POINTER pnt1,pnt2,pntt;
 				if(!index)index=mdt->sz;
-				else t::index(index,mdt->sz);
+				else t::Index(index,mdt->sz);
 				if(LETTER* str=this->Change(mdt->sz+sz)){
-					adr.a1=(POINTER)str;adr.a2=(POINTER)mdt->str;
-					if(index)t::copy(adr,index);
-					pnt=adr.a2;
-					adr.a2=(POINTER)obj.mdt->str;t::copy(adr,sz);
-					adr.a2=pnt;t::copy(adr,mdt->sz-index);*(BYTE*)adr.a1=0;
+					pnt1=(POINTER)str;pnt2=(POINTER)mdt->str;
+					if(index)t::Copy(pnt1,pnt2,index);
+					pntt=pnt2;pnt2=(POINTER)obj.mdt->str;
+					t::Copy(pnt1,pnt2,sz);pnt2=pntt;
+					t::Copy(pnt1,pnt2,mdt->sz-index);
+					*(BYTE*)pnt1=0;
 					delete []mdt->str;mdt->str=str;
 				}else{
-					adr.a1=(POINTER)mdt->str;t::shift(adr.a1,mdt->sz);
-					adr.a2=adr.a1;t::shift(adr.a1,sz);//pnt=adr.a1;t::shift(pnt);
-					//std::cout<<"adr="<<pnt<<std::endl;
-					*(BYTE*)adr.a1=0;t::copy(adr,-(mdt->sz-index));
-					adr.a1=adr.a2;adr.a2=(POINTER)obj.mdt->str;t::copy(adr,sz);
+					pnt1=(POINTER)mdt->str;t::Shift(pnt1,mdt->sz);
+					pnt2=pnt1;t::Shift(pnt1,sz);*(BYTE*)pnt1=0;
+					t::Copy(pnt1,pnt2,-(mdt->sz-index));
+					pnt1=pnt2;pnt2=(POINTER)obj.mdt->str;
+					t::Copy(pnt1,pnt2,sz);
 				}
 				mdt->sz+=sz;
 			}
@@ -409,22 +400,22 @@ public:
 	}
 	void Cut(INT_W index,INT_W size){
 		if(size && mdt->sz){
-			t::index(index,mdt->sz);
+			t::Index(index,mdt->sz);
 			if(index+size>mdt->sz)size=mdt->sz-index;
-			Addrs adr;
+			POINTER pnt1,pnt2;
 			if(LETTER* str=this->Change(mdt->sz-size)){
-				adr.a1=(POINTER)str;adr.a2=(POINTER)mdt->str;
-				if(index)t::copy(adr,index);
-				t::shift(adr.a2,size);index+=size;
-				t::copy(adr,mdt->sz-index);
+				pnt1=(POINTER)str;pnt2=(POINTER)mdt->str;
+				if(index)t::Copy(pnt1,pnt2,index);
+				t::Shift(pnt2,size);index+=size;
+				t::Copy(pnt1,pnt2,mdt->sz-index);
 				delete []mdt->str;mdt->str=str;
 			}else{
-				adr.a1=(POINTER)mdt->str;
-				if(index)t::shift(adr.a1,index);
-				adr.a2=adr.a1;t::shift(adr.a2,size);
-				index+=size;t::copy(adr,mdt->sz-index);
+				pnt1=(POINTER)mdt->str;
+				if(index)t::Shift(pnt1,index);
+				pnt2=pnt1;t::Shift(pnt2,size);
+				index+=size;t::Copy(pnt1,pnt2,mdt->sz-index);
 			}
-			*(BYTE*)adr.a1=0;mdt->sz-=size;
+			*(BYTE*)pnt1=0;mdt->sz-=size;
 		}
 	}
 	void Cut(const STRING &obj,INT_W index=0){
@@ -434,12 +425,12 @@ public:
 	INT_W Find(const STRING &obj,INT_W index=0){
 		INT_W res=0;
 		if(mdt->sz){
-			t::index(index,mdt->sz);
+			t::Index(index,mdt->sz);
 			POINTER pse=mdt->str;
-			if(index>0)t::shift(pse,index);
+			if(index>0)t::Shift(pse,index);
 			for(INT_W lmx=mdt->sz-obj.mdt->sz;index<=lmx;index++){
-				if(t::compare(pse,obj.mdt->str,obj.mdt->sz)){res=index+1;break;}
-				t::shift(pse);
+				if(t::Compare(pse,obj.mdt->str,obj.mdt->sz)){res=index+1;break;}
+				t::Shift(pse);
 			}
 		}
 		return res;
@@ -451,7 +442,7 @@ public:
 	#endif
 };
 
-/** ДатаВремя */
+/** Р”Р°С‚Р°Р’СЂРµРјСЏ */
 class DATETIME {
 private:
 	time_t dtm;
@@ -488,27 +479,16 @@ public:
 	}
 };
 
-/** Пространство имёт от _types */
-namespace t{
-	/** Все основные типы данных */
-	template <typename dTYPE>
-	constexpr bool isBaseA=IsMatch<dTYPE,LOGIC,LETTER,RANGE,BYTE,INT_S,INT_W,INT_M,INT_L,INT_T,INT_B,FLOAT,DOUBLE,POINTER,DATETIME,STRING>::v;
-	/** Основные типы данных */
-	template <typename dTYPE>
-	constexpr bool isBaseB=IsMatch<dTYPE,LOGIC,LETTER,RANGE,BYTE,INT_S,INT_W,INT_M,INT_L,INT_T,INT_B,FLOAT,DOUBLE,POINTER>::v;
-};
-
-/** Структура типа по Id */
-template<INT_W> struct ById;
-/** Структура типа Id и Name */
+/** РЎС‚СЂСѓРєС‚СѓСЂР° С‚РёРїР° Id Рё Name */
 template<typename dTYPE> struct Type {
+	/** Id С‚РёРїР° */
 	static const INT_W Id=0;
+	/** Name С‚РёРїР° */
 	static constexpr char Name[]="UNKNOWN";
 };
 
-/** Добавление ID типа */
+/** Р”РѕР±Р°РІР»РµРЅРёРµ ID С‚РёРїР° */
 #define ID_TYPE(nID,dTYPE) \
-template<> struct ById<nID> {typedef dTYPE type;};\
 template<> struct Type<dTYPE> {\
 	static const INT_W Id=nID;\
 	static constexpr char Name[]=#dTYPE;\
@@ -530,170 +510,337 @@ ID_TYPE(13,POINTER)
 ID_TYPE(14,DATETIME)
 ID_TYPE(15,STRING)
 
-/* Ссылка */
+/** РџСЂРѕСЃС‚СЂР°РЅСЃС‚РІРѕ РёРјС‘С‚ РѕС‚ _types */
+namespace t{
+	/** Р’СЃРµ РѕСЃРЅРѕРІРЅС‹Рµ С‚РёРїС‹ РґР°РЅРЅС‹С… */
+	template <typename dTYPE>
+	constexpr bool isBaseA=IsMatch<dTYPE,LOGIC,LETTER,RANGE,BYTE,INT_S,INT_W,INT_M,INT_L,INT_T,INT_B,FLOAT,DOUBLE,POINTER,DATETIME,STRING>::v;
+	/** РћСЃРЅРѕРІРЅС‹Рµ С‚РёРїС‹ РґР°РЅРЅС‹С… */
+	template <typename dTYPE>
+	constexpr bool isBaseB=IsMatch<dTYPE,LOGIC,LETTER,RANGE,BYTE,INT_S,INT_W,INT_M,INT_L,INT_T,INT_B,FLOAT,DOUBLE,POINTER>::v;
+
+	/** РљРѕРЅРІРµСЂС‚Р°С†РёСЏ С‚РёРїР° РґР°РЅРЅС‹С…
+	 * @param val Р·РЅР°С‡РµРЅРёРµ
+	 * @return Р·РЅР°С‡РµРЅРёРµ СЃ РЅРѕРІС‹Рј С‚РёРїРѕРј */
+	template <typename dTYPE,typename nTYPE>
+	nTYPE convert(dTYPE val){
+		return static_cast<nTYPE>(val);
+	}
+	/** РџСЂРѕРІРµСЂРєР° РЅР° NULL
+	 * @param val РїРµСЂРµРјРµРЅРЅР°СЏ
+	 * @return `true` NULL, РёРЅР°С‡Рµ `false` */
+	template <typename dTYPE>
+	LOGIC isNULL(dTYPE val){
+		STRING vtp=::Type<dTYPE>::Name;
+		return (vtp=="INT_T" && val==0);
+	}
+};
+
+/* РЎСЃС‹Р»РєР° */
 class LINK {
 private:
-	INT_W idt,vsz;
 	STRING vtp;
 	POINTER pnt=NULL;
+	INT_W vsz=0,idt=0;
 public:
 	LINK(){}
 	template<typename dTYPE>
-	LINK(dTYPE &obj){*this=obj;}
+	LINK(dTYPE &obj){this->Init(obj);}
 	LINK(const LINK &obj):idt(obj.idt),vsz(obj.vsz),vtp(obj.vtp),pnt(obj.pnt){}
-	POINTER operator *(){return this->pnt;}
+	POINTER operator *(){return pnt;}
 	template <typename dTYPE>
-	explicit operator dTYPE() const{return *(dTYPE*)this->pnt;}
-	LINK& operator=(LINK &obj){
-		this->idt=obj.idt;this->vtp=obj.vtp;this->pnt=obj.pnt;
-		return *this;
-	}
+	operator dTYPE(){return *(dTYPE*)pnt;}
+	explicit operator bool(){return pnt?true:false;}
 	template<typename dTYPE>
-	LINK& operator=(dTYPE &obj){
-		this->idt=::Type<dTYPE>::Id;this->vsz=sizeof(dTYPE);
-		this->vtp=::Type<dTYPE>::Name;this->pnt=&obj;
+	t::Enable<t::isBaseB<dTYPE>,LINK&> operator=(dTYPE val){
+		TRY
+		if(idt==::Type<dTYPE>::Id)*(dTYPE*)pnt=val;
+		#ifdef FILE_error
+		else throw Error("LINK = РЅРµ СЃРѕРѕС‚РІРµС‚СЃС‚РІСѓРµС‚ С‚РёРїСѓ!");
+		#endif
+		CATCH
 		return *this;
 	}
 	INT_W Id(){return this->idt;}
 	INT_W Size(){return this->vsz;}
 	STRING Type(){return this->vtp;}
+	template<typename dTYPE>
+	void Init(dTYPE &obj){
+		pnt=&obj;
+		vsz=sizeof(dTYPE);
+		idt=::Type<dTYPE>::Id;
+		vtp=::Type<dTYPE>::Name;
+	}
+	void Clear(){
+		pnt=NULL;vsz=idt=0;vtp="";
+	}
 	#ifdef _GLIBCXX_IOSTREAM
-	friend std::ostream& operator<< (std::ostream &out,const LINK &obj){
-		return out<<"LINK{"<<obj.vtp<<":"<<obj.vsz<<"}";
+	friend std::ostream& operator<<(std::ostream &out,const LINK &obj){
+		if(obj.pnt){
+			switch(obj.idt){//,
+			//(*(LOGIC*)obj.pnt?"true":"false")
+			//boolalpha<<*(LOGIC*)obj.pnt<<noboolalpha
+				case 1:	out<<*(LOGIC*)obj.pnt;break;
+				case 2:	out<<*(LETTER*)obj.pnt;break;
+				case 3:	out<<(INT_S)*(RANGE*)obj.pnt;break;
+				case 4:	out<<(INT_W)*(BYTE*)obj.pnt;break;
+				case 5:	out<<*(INT_S*)obj.pnt;break;
+				case 6:	out<<*(INT_W*)obj.pnt;break;
+				case 7:	out<<*(INT_M*)obj.pnt;break;
+				case 8:	out<<*(INT_L*)obj.pnt;break;
+				case 9:	out<<*(INT_T*)obj.pnt;break;
+				case 10:out<<*(INT_B*)obj.pnt;break;
+				case 11:out<<*(FLOAT*)obj.pnt;break;
+				case 12:out<<*(DOUBLE*)obj.pnt;break;
+				case 13:out<<*(POINTER*)obj.pnt;break;
+				case 14:out<<*(DATETIME*)obj.pnt;break;
+				case 15:out<<*(STRING*)obj.pnt;break;
+				default:out<<obj.vtp;
+			}
+		}else out<<"NULL";
+		return out;
 	}
 	#endif
 };
 ID_TYPE(16,LINK)
 
-/** Любой тип */
+/** Р›СЋР±РѕР№ С‚РёРї */
 class ANY {
-struct Data {
-	INT_W idt;
-	STRING vtp;
-	POINTER pnt=NULL;
-};
-	Data *mdt;
-	LOGIC dbl=false;
-	void Init(){this->mdt=new Data;}
+private:
+	LINK lnk;
 	void Clear(){
-		if(mdt->pnt){
-			switch(mdt->idt){
-				case 1:	delete static_cast<LOGIC*>(mdt->pnt);break;
-				case 2:	delete static_cast<LETTER*>(mdt->pnt);break;
-				case 3:	delete static_cast<RANGE*>(mdt->pnt);break;
-				case 4:	delete static_cast<BYTE*>(mdt->pnt);break;
-				case 5:	delete static_cast<INT_S*>(mdt->pnt);break;
-				case 6:	delete static_cast<INT_W*>(mdt->pnt);break;
-				case 7:	delete static_cast<INT_M*>(mdt->pnt);break;
-				case 8:	delete static_cast<INT_L*>(mdt->pnt);break;
-				case 9:	delete static_cast<INT_T*>(mdt->pnt);break;
-				case 10:delete static_cast<INT_B*>(mdt->pnt);break;
-				case 11:delete static_cast<FLOAT*>(mdt->pnt);break;
-				case 12:delete static_cast<DOUBLE*>(mdt->pnt);break;
-				case 13:delete static_cast<POINTER*>(mdt->pnt);break;
-				case 14:delete static_cast<DATETIME*>(mdt->pnt);break;
-				case 15:delete static_cast<STRING*>(mdt->pnt);break;
-				default:delete static_cast<LINK*>(mdt->pnt);
+		if(lnk){
+			switch(lnk.Id()){
+				case 1:	delete static_cast<LOGIC*>(*lnk);break;
+				case 2:	delete static_cast<LETTER*>(*lnk);break;
+				case 3:	delete static_cast<RANGE*>(*lnk);break;
+				case 4:	delete static_cast<BYTE*>(*lnk);break;
+				case 5:	delete static_cast<INT_S*>(*lnk);break;
+				case 6:	delete static_cast<INT_W*>(*lnk);break;
+				case 7:	delete static_cast<INT_M*>(*lnk);break;
+				case 8:	delete static_cast<INT_L*>(*lnk);break;
+				case 9:	delete static_cast<INT_T*>(*lnk);break;
+				case 10:delete static_cast<INT_B*>(*lnk);break;
+				case 11:delete static_cast<FLOAT*>(*lnk);break;
+				case 12:delete static_cast<DOUBLE*>(*lnk);break;
+				case 13:delete static_cast<POINTER*>(*lnk);break;
+				case 14:delete static_cast<DATETIME*>(*lnk);break;
+				case 15:delete static_cast<STRING*>(*lnk);break;
+				default:delete static_cast<LINK*>(*lnk);
 			}
-			mdt->pnt=NULL;
+			lnk.Clear();
 		}
 	}
 public:
-	ANY(){this->Init();}
+	ANY(){}
 	template <typename dTYPE>
-	ANY(dTYPE val){this->Init();*this=val;}
-	ANY(const ANY &obj): mdt(obj.mdt),dbl(true){}
-	~ANY(){if(!this->dbl)delete this->mdt;}
+	ANY(dTYPE val){*this=val;}
+	ANY(const ANY &obj): lnk(obj.lnk){}
+	~ANY(){Clear();}
+	explicit operator bool(){return (LOGIC)lnk;}
 	template <typename dTYPE>
-	explicit operator dTYPE(){
-		return mdt->idt!=16?*(dTYPE*)mdt->pnt:(dTYPE)*(LINK*)mdt->pnt;
-	}
-	POINTER operator*(){return mdt->idt!=16?mdt->pnt:**(LINK*)mdt->pnt;}
+	explicit operator dTYPE(){return (dTYPE)lnk;}
 	template <typename dTYPE>
-	t::Enable<t::isBaseA<dTYPE>,ANY&> operator=(dTYPE val){
-		STRING ntp=::Type<dTYPE>::Name;
-		if(mdt->vtp!=ntp){this->Clear();
-			mdt->pnt=new dTYPE(val);
-			mdt->vtp=ntp;mdt->idt=::Type<dTYPE>::Id;
-		}else *(dTYPE*)mdt->pnt=val;
+	ANY& operator=(dTYPE val){
+		if(lnk.Id()==::Type<dTYPE>::Id)lnk=val;
+		else{
+			Clear();
+			if(!t::isNULL(val)){
+				dTYPE *obj=new dTYPE(val);
+				lnk.Init(*obj);
+			}
+		}
 		return *this;
 	}
-	template <class oCLASS>
-	t::Enable<!t::isBaseA<oCLASS>,ANY&> operator=(oCLASS &obj){
-		STRING ntp=::Type<oCLASS>::Name;
-		if(mdt->vtp!=ntp){this->Clear();
-			mdt->pnt=new LINK(obj);
-			mdt->vtp="LINK";mdt->idt=16;
-		}else *(LINK*)mdt->pnt=obj;
+	ANY& operator++(int){
+		switch(lnk.Id()){
+			case 1:	lnk=(LOGIC)((LOGIC)lnk?0:1);break;
+			case 2:	lnk=(LETTER)((LETTER)lnk+1);break;
+			case 3:	lnk=(RANGE)((RANGE)lnk+1);break;
+			case 4:	lnk=(BYTE)((BYTE)lnk+1);break;
+			case 5:	lnk=(INT_S)((INT_S)lnk+1);break;
+			case 6:	lnk=(INT_W)((INT_W)lnk+1);break;
+			case 7:	lnk=(INT_M)((INT_M)lnk+1);break;
+			case 8:	lnk=(INT_L)((INT_L)lnk+1);break;
+			case 9:	lnk=(INT_T)((INT_T)lnk+1);break;
+			case 10:lnk=(INT_B)((INT_B)lnk+1);break;
+			case 11:lnk=(FLOAT)lnk+(FLOAT)0.01;break;
+			case 12:lnk=(DOUBLE)lnk+(DOUBLE)0.0001;break;
+			//case 13:lnk=(POINTER)lnk+1;break;
+			//case 14:lnk=(DATETIME)lnk+1;break;
+			//case 15:lnk=(STRING)lnk+1;break;
+			//default:
+		}
 		return *this;
 	}
-	ANY& operator=(CHARS(ltr)){
-		STRING *str=new STRING(ltr);*this=*str;
-		return *this;
-	}
-	ANY& operator=(ANY &obj){
-		switch(obj.mdt->idt){
-			case 1:	*this=(LOGIC)obj;break;
-			case 2:	*this=(LETTER)obj;break;
-			case 3:	*this=(RANGE)obj;break;
-			case 4:	*this=(BYTE)obj;break;
-			case 5:	*this=(INT_S)obj;break;
-			case 6:	*this=(INT_W)obj;break;
-			case 7:	*this=(INT_M)obj;break;
-			case 8:	*this=(INT_L)obj;break;
-			case 9:	*this=(INT_T)obj;break;
-			case 10:*this=(INT_B)obj;break;
-			case 11:*this=(FLOAT)obj;break;
-			case 12:*this=(DOUBLE)obj;break;
-			case 13:*this=(POINTER)obj;break;
-			case 14:*this=(DATETIME)obj;break;
-			case 15:*this=(STRING)obj;break;
-			default:*this=*(LINK*)obj.mdt->pnt;
+	ANY& operator--(int){
+		switch(lnk.Id()){
+			case 1:	lnk=(LOGIC)((LOGIC)lnk?0:1);break;
+			case 2:	lnk=(LETTER)((LETTER)lnk-1);break;
+			case 3:	lnk=(RANGE)((RANGE)lnk-1);break;
+			case 4:	lnk=(BYTE)((BYTE)lnk-1);break;
+			case 5:	lnk=(INT_S)((INT_S)lnk-1);break;
+			case 6:	lnk=(INT_W)((INT_W)lnk-1);break;
+			case 7:	lnk=(INT_M)((INT_M)lnk-1);break;
+			case 8:	lnk=(INT_L)((INT_L)lnk-1);break;
+			case 9:	lnk=(INT_T)((INT_T)lnk-1);break;
+			case 10:lnk=(INT_B)((INT_B)lnk-1);break;
+			case 11:lnk=(FLOAT)lnk-(FLOAT)0.01;break;
+			case 12:lnk=(DOUBLE)lnk-(DOUBLE)0.0001;break;
+			//case 13:lnk=(POINTER)lnk+1;break;
+			//case 14:lnk=(DATETIME)lnk+1;break;
+			//case 15:lnk=(STRING)lnk+1;break;
+			//default:
 		}
 		return *this;
 	}
 	template <typename dTYPE>
-	LOGIC operator==(dTYPE val){
-		LOGIC res=false;
-		if(mdt->idt==::Type<dTYPE>::Id)
-			if((dTYPE)*this==val)res=true;
-		return res;
+	ANY& operator+(dTYPE val){
+		TRY
+		if(lnk.Id()==::Type<dTYPE>::Id)lnk=(dTYPE)lnk+val;
+		#ifdef FILE_error
+		else throw Error("РћРїРµСЂР°С‚РѕСЂ + РЅРµ СЃРѕРѕС‚РІРµС‚СЃС‚РІСѓРµС‚ С‚РёРїСѓ!");
+		#endif
+		CATCH
+		return *this;
 	}
-	LOGIC operator==(CHARS(ltr)){
-		LOGIC res=false;
-		if(mdt->idt==15)
-			if((STRING)*this==ltr)res=true;
-		return res;
+	template <typename dTYPE>
+	ANY& operator-(dTYPE val){
+		TRY
+		if(lnk.Id()==::Type<dTYPE>::Id)lnk=(dTYPE)lnk-val;
+		#ifdef FILE_error
+		else throw Error("РћРїРµСЂР°С‚РѕСЂ - РЅРµ СЃРѕРѕС‚РІРµС‚СЃС‚РІСѓРµС‚ С‚РёРїСѓ!");
+		#endif
+		CATCH
+		return *this;
 	}
-	INT_W Id(){return mdt->idt!=16?mdt->idt:(*(LINK*)mdt->pnt).Id();}
-	STRING Type(){return mdt->idt!=16?mdt->vtp:(*(LINK*)mdt->pnt).Type();}
+	template <typename dTYPE>
+	ANY& operator*(dTYPE val){
+		TRY
+		if(lnk.Id()==::Type<dTYPE>::Id)lnk=(dTYPE)lnk*val;
+		#ifdef FILE_error
+		else throw Error("РћРїРµСЂР°С‚РѕСЂ * РЅРµ СЃРѕРѕС‚РІРµС‚СЃС‚РІСѓРµС‚ С‚РёРїСѓ!");
+		#endif
+		CATCH
+		return *this;
+	}
+	template <typename dTYPE>
+	ANY& operator/(dTYPE val){
+		TRY
+		if(lnk.Id()==::Type<dTYPE>::Id)lnk=(dTYPE)lnk/val;
+		#ifdef FILE_error
+		else throw Error("РћРїРµСЂР°С‚РѕСЂ / РЅРµ СЃРѕРѕС‚РІРµС‚СЃС‚РІСѓРµС‚ С‚РёРїСѓ!");
+		#endif
+		CATCH
+		return *this;
+	}
+	template <typename dTYPE>
+	ANY& operator+=(dTYPE val){
+		TRY
+		if(lnk.Id()==::Type<dTYPE>::Id)lnk=(dTYPE)lnk+val;
+		#ifdef FILE_error
+		else throw Error("РћРїРµСЂР°С‚РѕСЂ += РЅРµ СЃРѕРѕС‚РІРµС‚СЃС‚РІСѓРµС‚ С‚РёРїСѓ!");
+		#endif
+		CATCH
+		return *this;
+	}
+	template <typename dTYPE>
+	ANY& operator-=(dTYPE val){
+		TRY
+		if(lnk.Id()==::Type<dTYPE>::Id)lnk=(dTYPE)lnk-val;
+		#ifdef FILE_error
+		else throw Error("РћРїРµСЂР°С‚РѕСЂ -= РЅРµ СЃРѕРѕС‚РІРµС‚СЃС‚РІСѓРµС‚ С‚РёРїСѓ!");
+		#endif
+		CATCH
+		return *this;
+	}
+	template <typename dTYPE>
+	ANY& operator*=(dTYPE val){
+		TRY
+		if(lnk.Id()==::Type<dTYPE>::Id)lnk=(dTYPE)lnk*val;
+		#ifdef FILE_error
+		else throw Error("РћРїРµСЂР°С‚РѕСЂ *= РЅРµ СЃРѕРѕС‚РІРµС‚СЃС‚РІСѓРµС‚ С‚РёРїСѓ!");
+		#endif
+		CATCH
+		return *this;
+	}
+	template <typename dTYPE>
+	ANY& operator/=(dTYPE val){
+		TRY
+		if(lnk.Id()==::Type<dTYPE>::Id)lnk=(dTYPE)lnk/val;
+		#ifdef FILE_error
+		else throw Error("РћРїРµСЂР°С‚РѕСЂ /= РЅРµ СЃРѕРѕС‚РІРµС‚СЃС‚РІСѓРµС‚ С‚РёРїСѓ!");
+		#endif
+		CATCH
+		return *this;
+	}
+	template <typename dTYPE>
+	ANY& operator%=(dTYPE val){
+		TRY
+		if(lnk.Id()==::Type<dTYPE>::Id)lnk=(dTYPE)lnk%val;
+		#ifdef FILE_error
+		else throw Error("РћРїРµСЂР°С‚РѕСЂ %= РЅРµ СЃРѕРѕС‚РІРµС‚СЃС‚РІСѓРµС‚ С‚РёРїСѓ!");
+		#endif
+		CATCH
+		return *this;
+	}
+	template <typename dTYPE>
+	ANY& operator&=(dTYPE val){
+		TRY
+		if(lnk.Id()==::Type<dTYPE>::Id)lnk=(dTYPE)lnk&val;
+		#ifdef FILE_error
+		else throw Error("РћРїРµСЂР°С‚РѕСЂ &= РЅРµ СЃРѕРѕС‚РІРµС‚СЃС‚РІСѓРµС‚ С‚РёРїСѓ!");
+		#endif
+		CATCH
+		return *this;
+	}
+	template <typename dTYPE>
+	ANY& operator|=(dTYPE val){
+		TRY
+		if(lnk.Id()==::Type<dTYPE>::Id)lnk=(dTYPE)lnk|val;
+		#ifdef FILE_error
+		else throw Error("РћРїРµСЂР°С‚РѕСЂ |= РЅРµ СЃРѕРѕС‚РІРµС‚СЃС‚РІСѓРµС‚ С‚РёРїСѓ!");
+		#endif
+		CATCH
+		return *this;
+	}
+	template <typename dTYPE>
+	ANY& operator^=(dTYPE val){
+		TRY
+		if(lnk.Id()==::Type<dTYPE>::Id)lnk=(dTYPE)lnk^val;
+		#ifdef FILE_error
+		else throw Error("РћРїРµСЂР°С‚РѕСЂ ^= РЅРµ СЃРѕРѕС‚РІРµС‚СЃС‚РІСѓРµС‚ С‚РёРїСѓ!");
+		#endif
+		CATCH
+		return *this;
+	}
+	INT_W Id(){return lnk.Id();}
+	INT_W Size(){return lnk.Size();}
+	STRING Type(){return lnk.Type();}
 	#ifdef _GLIBCXX_IOSTREAM
 	friend std::ostream& operator<< (std::ostream &out,const ANY &obj){
-		if(obj.mdt->pnt){
-			switch(obj.mdt->idt){
-				case 1:	out<<(*(LOGIC*)obj.mdt->pnt?"true":"false");break;
-				case 2:	out<<*(LETTER*)obj.mdt->pnt;break;
-				case 3:	out<<*(RANGE*)obj.mdt->pnt;break;
-				case 4:	out<<*(BYTE*)obj.mdt->pnt;break;
-				case 5:	out<<*(INT_S*)obj.mdt->pnt;break;
-				case 6:	out<<*(INT_W*)obj.mdt->pnt;break;
-				case 7:	out<<*(INT_M*)obj.mdt->pnt;break;
-				case 8:	out<<*(INT_L*)obj.mdt->pnt;break;
-				case 9:	out<<*(INT_T*)obj.mdt->pnt;break;
-				case 10:out<<*(INT_B*)obj.mdt->pnt;break;
-				case 11:out<<*(FLOAT*)obj.mdt->pnt;break;
-				case 12:out<<*(DOUBLE*)obj.mdt->pnt;break;
-				case 13:out<<*(POINTER*)obj.mdt->pnt;break;
-				case 14:out<<*(DATETIME*)obj.mdt->pnt;break;
-				case 15:out<<*(STRING*)obj.mdt->pnt;break;
-				default:out<<(*(LINK*)obj.mdt->pnt).Type();
-			}
-		}else out << "NULL";
-		return out;
+		return out<<obj.lnk;
 	}
 	#endif
-};
+}; 
 ID_TYPE(20,ANY)
+
+namespace t {
+	/** РџРѕР»СѓС‡РµРЅРёРµ Id РїРµСЂРµРјРµРЅРЅРѕР№
+	 * @param var РїРµСЂРµРјРµРЅРЅР°СЏ 
+	 * @return Id РїРµСЂРµРјРµРЅРЅРѕР№ */
+	template<typename dTYPE>
+	INT_W Id(dTYPE var){
+		return ::Type<dTYPE>::Id;
+	}
+	/** РџРѕР»СѓС‡РµРЅРёРµ С‚РёРїР° РїРµСЂРµРјРµРЅРЅРѕР№
+	 * @param var РїРµСЂРµРјРµРЅРЅР°СЏ 
+	 * @return С‚РёРї РїРµСЂРµРјРµРЅРЅРѕР№ */
+	template<typename dTYPE>
+	STRING Type(dTYPE var){
+		return STRING(::Type<dTYPE>::Name);
+	}
+};
 
 #define FILE_types
 #endif

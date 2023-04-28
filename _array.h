@@ -1,4 +1,5 @@
-// Массивы
+/** Массивы
+ * Библиотека OWNI */
 
 #ifndef FILE_array
 
@@ -22,21 +23,21 @@ struct Data {
 	INT_L ix=0;
 	LOGIC dbl=false;
 	LOGIC how=false;
-public:
-	Array(const Array &obj): mdt(obj.mdt),dbl(true){}
-	Array(INT_L tl=0,INT_W rv=10){mdt=new Data;this->Init(tl,rv);}
-	~Array(){if(!this->dbl){delete []mdt->vars;delete mdt;}}
 	void Init(INT_L tl=0,INT_W rv=10){
 		if(this->dbl){mdt=new Data;dbl=false;}
 		else if(mdt->vars)delete []mdt->vars;
 		if(tl)mdt->vars=new dTYPE[tl];
 		mdt->rv=rv;mdt->tl=tl;mdt->sz=this->ix=0;
 	}
+public:
+	Array(const Array &obj): mdt(obj.mdt),dbl(true){}
+	Array(INT_L tl=0,INT_W rv=10){mdt=new Data;this->Init(tl,rv);}
+	~Array(){if(!this->dbl){delete []mdt->vars;delete mdt;}}
 	void Clear(){this->Init(mdt->tl,mdt->rv);}
 	operator bool(){return mdt->sz?true:false;}
 	dTYPE& operator[](INT_L index){
 		if(index==0)index=this->ix;
-		else t::index(index,mdt->sz);
+		else t::Index(index,mdt->sz);
 		return mdt->vars[index];
 	}
 	Array<dTYPE>& operator=(const Array<dTYPE> &oar){
@@ -52,17 +53,26 @@ public:
 	}
 	INT_L Size(){return mdt->sz;}
 	INT_L Total(){return mdt->tl;}
-	INT_L Index(){return this->ix+1;}
+	INT_L Index(){return mdt->sz?this->ix+1:0;}
 	INT_L Reserve(){return mdt->rv;}
 	void Reserve(INT_W rv){mdt->rv=rv;}
 	void How(LOGIC how){
-		this->Index(how?-1:0);this->how=how;
+		Index(how?-1:0);this->how=how;
 	}
 	void Index(INT_L index){
-		t::index(index,mdt->sz);this->ix=index;
+		t::Index(index,mdt->sz);this->ix=index;
 	}
 	void Reset(){
-		this->ix=this->how?mdt->sz:0;
+		Index(this->how?-1:0);
+	}
+	LOGIC Last(){
+		LOGIC res=false;
+		if(this->how){
+			if(this->ix==0)res=true;
+		}else{
+			if(this->ix==mdt->sz-1)res=true;
+		}
+		return res;
 	}
 	LOGIC Next(){
 		LOGIC res=false;
@@ -77,10 +87,10 @@ public:
 		INT_L ntx=mdt->rv?4294967295:mdt->tl;
 		if(mdt->sz!=ntx){
 			if(index==0)index=mdt->sz;
-			else t::index(index,mdt->sz);
+			else t::Index(index,mdt->sz);
 			mdt->sz++;
 			if(mdt->rv){
-				ntx=t::volume(mdt->sz,mdt->rv);
+				ntx=t::Volume(mdt->sz,mdt->rv);
 				if(mdt->tl!=ntx){
 					dTYPE *vars=new dTYPE[ntx] ;
 					if(mdt->tl){INT_L nx=0;
@@ -105,7 +115,7 @@ public:
 	dTYPE Take(INT_L index=-1){
 		dTYPE val;
 		if(mdt->sz){
-			t::index(index,mdt->sz);
+			t::Index(index,mdt->sz);
 			val=mdt->vars[index];mdt->sz--;
 			while(index<mdt->sz){
 				mdt->vars[index]=mdt->vars[index+1];index++;
@@ -113,6 +123,20 @@ public:
 		}else val=0;
 		return val;
 	}
+	#ifdef _GLIBCXX_IOSTREAM
+	friend std::ostream& operator<< (std::ostream &out,const Array<dTYPE> &oar){
+		Array<dTYPE> obj(oar);INT_L sz=obj.Size();
+		if(sz){out<<std::endl;
+			INT_L ix=oar.ix+1;
+			for(INT_L nx=0;nx++<sz;){
+				t::tab(1);
+				out<<'['<<nx<<']'<<(ix==nx?'>':' ');
+				t::v(obj[nx]);out<<std::endl;
+			}
+		}else out<<"NULL";
+		return out;
+	}
+	#endif
 };
 
 ID_TYPE(21,Array<LOGIC>)
@@ -134,8 +158,8 @@ ID_TYPE(35,Array<STRING>)
 /** Аргументы */
 class Args {
 private:
-	Array<POINTER> *apr;
 	LOGIC dbl=false;
+	Array<POINTER> *apr;	
 	void Init(){this->apr=new Array<POINTER>;}
 public:
 	Args(){this->Init();}
@@ -168,10 +192,10 @@ public:
 		}
 		return *(ANY*)(*apr)[index];
 	}
-	template<typename... aARG>
+	/*template<typename... aARG>
 	void Set(aARG... args){
 		this->Clear();(apr->Put(args), ...);
-	}
+	}*/
 	template <typename dTYPE>
 	void Put(dTYPE val){
 		ANY *vdt=new ANY(val);apr->Put(vdt);
@@ -198,6 +222,25 @@ public:
 		}
 		return res;
 	}
+	#ifdef _GLIBCXX_IOSTREAM
+	friend std::ostream& operator<< (std::ostream &out,const Args &oar){
+		Args obj(oar);INT_L sz=obj.Size();
+		if(sz){out<<std::endl;
+			//INT_L ix=oar.ix+1;
+			for(INT_L nx=0;nx++<sz;){
+				t::tab(1);
+				out<<'['<<nx<<']';//<<(ix==nx?'>':' ');
+				#ifdef FILE_zests
+					z::o(obj[nx]);
+				#else
+					t::v(obj[nx]);
+				#endif
+				out<<std::endl;
+			}
+		}else out<<"NULL";
+		return out;
+	}
+	#endif
 };
 ID_TYPE(17,Args)
 
@@ -280,6 +323,29 @@ public:
 	}
 };
 ID_TYPE(18,Associative)
+/*
+#ifdef FILE_zests
+namespace a {
+	template <typename dTYPE>
+	void v(const Array<dTYPE> &oar){
+		Array<dTYPE> obj(oar);
+		INT_W rv=obj.Reserve();INT_L sz=obj.Size();
+		t::tab();
+		std::cout<<"Array<"<<::Type<dTYPE>::Name<<">("<<sz;
+		if(rv)std::cout<<','<<obj.Total()<<','<<rv;
+		std::cout<<"){";
+		if(sz){std::cout<<std::endl;
+			INT_L ix=obj.Index();
+			for(INT_L nx=0;nx++<sz;){
+				t::tab(1);
+				std::cout<<'['<<nx<<']'<<(ix==nx?'>':' ');
+				t::v(obj[nx]);std::cout<<std::endl;
+			}
+		}
+		std::cout <<'}';
+	}
+}
+#endif*/
 
 #define FILE_array
 #endif

@@ -9,48 +9,76 @@
 /** Пространство имёт от _zests */
 namespace z {
 	using namespace std;
-	//LOGIC s=true;
 	/** число символов сдвига табуляции*/
 	INT_W t=0;
 	/** Табуляция 
 	 * @param tb число символов табуляции
 	 * @param sl символ табуляции	*/
 	void tab(INT_W tb=0,LETTER sl=' '){
-		INT_W szt=z::t+tb;
+		INT_W szt=t+tb;
 		if(szt){
 			LETTER ltr[szt+1];POINTER pnt=ltr;
-			t::fill(pnt,szt,(BYTE)sl);*(BYTE*)pnt=0;
+			t::Fill(pnt,szt,(BYTE)sl);*(BYTE*)pnt=0;
 			cout<<ltr;
 		}
 	}
 	/** Ввод значения */
 	template <typename dTYPE>
-	void i(dTYPE &var,STRING msg=""){
-		cout<<endl;
-		if(msg)cout<<msg <<": ";
+	void i(dTYPE &var){
 		cin>>var;
 	}
-	/** Вывод значения
-	 * @param var переменная
-	 * @param msg сообщение */
+	/** Ввод значения */
 	template <typename dTYPE>
-	void o(const dTYPE &var,STRING msg=""){
-		cout<<endl;
-		if(msg){tab();cout<<"# "<<msg<<endl;}
-		tab();cout<<var<<endl;
+	void i(STRING msg,dTYPE &var){
+		cout<<endl<<msg<<": ";cin>>var;
 	}
-	/** Вывод значения
-	 * @param str строка
-	 * @param msg сообщение */
-	void o(const STRING &str,STRING msg=""){
-		tab();cout<<endl;
-		if(msg){tab();cout<<"# "<<msg<<endl;}
+	/* * Вывод типа и значения
+	 * @param var переменная * /
+	 -----------------
+	template <typename dTYPE>
+	void o(const dTYPE &var){
+		ANY any(var);
+		cout<<endl;tab();
+		cout<<any.Type()<<'{'<<any<<'}';
+	}
+	/** Вывод типа и значения с сообщением
+	 * @param msg сообщение
+	 * @param var переменная * /
+	template <typename dTYPE>
+	void o(STRING msg,const dTYPE &var){
+		ANY any(var);
+		cout<<endl;tab();
+		cout<<msg<<": "<<any.Type()<<'{'<<any<<'}';
+	}
+	---------------
+	*/
+	/* * Вывод строки и параметров
+	 * @param str строка * /
+	void o(const STRING &str){
 		STRING obj(str);
 		INT_W rv=obj.Reserve();
-		tab();cout<<"STRING("<<obj.Size()<<','<<obj.Total();
-		if(rv)cout<<','<<rv;
-		cout<<"){"<<obj<<'}'<<endl;
+		cout<<endl;t::tab();
+		cout<<"STRING("<<obj.Size();
+		if(rv)cout<<','<<obj.Total()<<','<<rv;
+		cout<<"){"<<obj<<'}';
 	}
+	/ ** Вывод строки и параметров с сообщением
+	 * @param str строка * /
+	void o(STRING msg,const STRING &str){
+		STRING obj(str);
+		INT_W rv=obj.Reserve();
+		cout<<endl;t::tab();
+		cout<<msg<<": "<<"STRING("<<obj.Size();
+		if(rv)cout<<','<<obj.Total()<<','<<rv;
+		cout<<"){"<<obj<<'}';
+	}
+	/ ** Вывод любого типа
+	 * @param any любой тип * /
+	void o(const ANY &any){
+		cout<<endl;t::tab();
+		ANY obj(any);
+		cout<<"ANY("<<obj.Type()<<"){"<<obj<<'}';
+	}*/
 	void dump(POINTER pnt,INT_W size){
 		cout<<endl<<"#address\t0  1  2  3  4  5  6  7\t\t~~dump~~"<<endl;
 		tab(56,'-');cout<<endl<<hex;
@@ -66,7 +94,7 @@ namespace z {
 				cout<<"\t\t"<<txt<<endl;
 				txt="        ";col=0;
 			}
-			t::shift(pnt);size--;
+			t::Shift(pnt);size--;
 		}
 		if(col){
 			if(col<6)cout<<'\t';
@@ -76,20 +104,17 @@ namespace z {
 		tab(56,'-');cout<<dec<<endl;
 	}
 	template <typename dTYPE>
-	void dump(const dTYPE &var,STRING msg=""){
+	void dump(const dTYPE &var){
 		cout<<endl<<"# "<<::Type<dTYPE>::Name;
-		if(msg)cout<<"\t"<<msg;
 		dump((POINTER)&var,sizeof(var));
 	}
-	void dump(LETTER *ltr,STRING msg=""){
-		INT_W sz=t::lsize(ltr);
-		cout<<endl;
-		tab();cout<<"# CHARS";
-		if(msg)cout<<"\t"<<msg;
+	void dump(LETTER *ltr){
+		INT_W sz=t::Lsize(ltr);
+		cout<<endl<<"# "<<(sz>1?"CHARS":"LETTER");
 		dump((POINTER)ltr,sz);
 	}
-	void dump(CHARS(ltr),STRING msg=""){
-		dump((LETTER*)ltr,msg);
+	void dump(CHARS(ltr)){
+		dump((LETTER*)ltr);
 	}
 	void dump(const STRING &str,STRING msg=""){
 		cout<<endl<<"# STRING";
@@ -111,10 +136,13 @@ namespace z {
 		tab(tb);cout <<'}'<<endl;
 	}*/
 
+	
+	/** Пауза */
+	void p(){
+		cout<<endl;system("pause");
+	}
 	/** Включение кирилицы */
 	void r(){setlocale(LC_ALL,"");}
-	/** Пауза */
-	void p(){system("pause");}
 }
 
 #define FILE_zests
