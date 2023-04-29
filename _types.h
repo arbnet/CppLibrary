@@ -277,13 +277,6 @@ namespace t {
 		while(ltr[sz]!='\0'){sz++;if(sz==65535)break;}
 		return sz;
 	}
-	/** Получить значение \\объект из указателя
-	 * @param pnt указатель
-	 * @return значение\\объект */
-	template<typename dTYPE>
-	dTYPE FromPointer(POINTER pnt){
-		return *(dTYPE*)pnt;
-	}
 }
 
 /** Строка */
@@ -531,8 +524,9 @@ namespace t{
 	 * @return `true` NULL, иначе `false` */
 	template <typename dTYPE>
 	LOGIC isNULL(dTYPE val){
-		STRING vtp=::Type<dTYPE>::Name;
-		return (vtp=="INT_T" && val==0);
+		LOGIC res=false;
+		if(::Type<dTYPE>::Name=="INT_T")if(!val)res=true;
+		return res;
 	}
 };
 
@@ -650,6 +644,10 @@ public:
 				lnk.Init(*obj);
 			}
 		}
+		return *this;
+	}
+	ANY& operator=(CHARS(ltr)){
+		STRING *str=new STRING(ltr);*this=*str;
 		return *this;
 	}
 	ANY& operator++(int){

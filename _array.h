@@ -1,17 +1,17 @@
-/** Массивы
- * Библиотека OWNI */
+/** РњР°СЃСЃРёРІС‹
+ * Р‘РёР±Р»РёРѕС‚РµРєР° OWNI */
 
 #ifndef FILE_array
 
 #include "_types.h"
 
-/** Структура КлючЗначение */
+/** РЎС‚СЂСѓРєС‚СѓСЂР° РљР»СЋС‡Р—РЅР°С‡РµРЅРёРµ */
 struct KeyValue {
 	STRING key;
 	ANY value;
 };
 
-/** Массив */
+/** РњР°СЃСЃРёРІ */
 template <typename dTYPE>
 class Array {
 struct Data {
@@ -112,6 +112,9 @@ public:
 			mdt->vars[index]=val;
 		}
 	}
+	//void Add(int cnt,dTYPE... vals){
+	//	(this->Put(vals), ...);
+	//}
 	dTYPE Take(INT_L index=-1){
 		dTYPE val;
 		if(mdt->sz){
@@ -126,13 +129,12 @@ public:
 	#ifdef _GLIBCXX_IOSTREAM
 	friend std::ostream& operator<< (std::ostream &out,const Array<dTYPE> &oar){
 		Array<dTYPE> obj(oar);INT_L sz=obj.Size();
-		if(sz){out<<std::endl;
+		if(sz){out<<std::endl<<'{'<<std::endl;
 			INT_L ix=oar.ix+1;
-			for(INT_L nx=0;nx++<sz;){
-				t::tab(1);
-				out<<'['<<nx<<']'<<(ix==nx?'>':' ');
-				t::v(obj[nx]);out<<std::endl;
+			for(INT_L nx=0;nx++<sz;){i::tab(1);
+				out<<'['<<nx<<']'<<(ix==nx?'>':' ')<<obj[nx]<<std::endl;
 			}
+			out<<'}';
 		}else out<<"NULL";
 		return out;
 	}
@@ -155,7 +157,7 @@ ID_TYPE(33,Array<POINTER>)
 ID_TYPE(34,Array<DATETIME>)
 ID_TYPE(35,Array<STRING>)
 
-/* * Аргументы * /
+/** РђСЂРіСѓРјРµРЅС‚С‹ */
 class Args {
 private:
 	LOGIC dbl=false;
@@ -192,10 +194,10 @@ public:
 		}
 		return *(ANY*)(*apr)[index];
 	}
-	/ *template<typename... aARG>
+	template<typename... aARG>
 	void Set(aARG... args){
-		this->Clear();(apr->Put(args), ...);
-	}* /
+		this->Clear();(this->Put(args), ...);
+	}
 	template <typename dTYPE>
 	void Put(dTYPE val){
 		ANY *vdt=new ANY(val);apr->Put(vdt);
@@ -225,18 +227,12 @@ public:
 	#ifdef _GLIBCXX_IOSTREAM
 	friend std::ostream& operator<< (std::ostream &out,const Args &oar){
 		Args obj(oar);INT_L sz=obj.Size();
-		if(sz){out<<std::endl;
-			//INT_L ix=oar.ix+1;
-			for(INT_L nx=0;nx++<sz;){
-				t::tab(1);
-				out<<'['<<nx<<']';//<<(ix==nx?'>':' ');
-				#ifdef FILE_zests
-					z::o(obj[nx]);
-				#else
-					t::v(obj[nx]);
-				#endif
-				out<<std::endl;
+		if(sz){out<<std::endl<<'{'<<std::endl;
+			INT_L ix=obj.Index();
+			for(INT_L nx=0;nx++<sz;){i::tab(1);
+				out<<'['<<nx<<']'<<(ix==nx?'>':' ')<<obj[nx]<<std::endl;
 			}
+			out<<'}';
 		}else out<<"NULL";
 		return out;
 	}
@@ -244,7 +240,7 @@ public:
 };
 ID_TYPE(17,Args)
 
-/* * Ассоциативный массив * /
+/* * РђСЃСЃРѕС†РёР°С‚РёРІРЅС‹Р№ РјР°СЃСЃРёРІ * /
 class Associative {
 private:
 	Array<POINTER> *apr;

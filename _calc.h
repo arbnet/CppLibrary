@@ -1,4 +1,4 @@
-// Вычисление\преобразование
+// Р’С‹С‡РёСЃР»РµРЅРёРµ\РїСЂРµРѕР±СЂР°Р·РѕРІР°РЅРёРµ
 
 #ifndef FILE_calc
 
@@ -14,59 +14,59 @@ namespace c {
 		}
 		return var;
 	}
-	/** Получение абсолютного значения
-	 * @param var переменная
-	 * @return абсолютное значение */
+	/** РџРѕР»СѓС‡РµРЅРёРµ Р°Р±СЃРѕР»СЋС‚РЅРѕРіРѕ Р·РЅР°С‡РµРЅРёСЏ
+	 * @param var РїРµСЂРµРјРµРЅРЅР°СЏ
+	 * @return Р°Р±СЃРѕР»СЋС‚РЅРѕРµ Р·РЅР°С‡РµРЅРёРµ */
 	template <typename dTYPE>
 	dTYPE absolute(dTYPE var){
 		if(var<0)var=-var;
 		return var;
 	}
-	/** Получение целого числа
-	 * @param var переменная FLOAT
-	 * @return целое число INT_L */
+	/** РџРѕР»СѓС‡РµРЅРёРµ С†РµР»РѕРіРѕ С‡РёСЃР»Р°
+	 * @param var РїРµСЂРµРјРµРЅРЅР°СЏ FLOAT
+	 * @return С†РµР»РѕРµ С‡РёСЃР»Рѕ INT_L */
 	INT_L integer(FLOAT var){
 		return INT_L(var);
 	}
-	/** Получение целого числа
-	 * @param var переменная DOUBLE
-	 * @return целое число INT_B */
+	/** РџРѕР»СѓС‡РµРЅРёРµ С†РµР»РѕРіРѕ С‡РёСЃР»Р°
+	 * @param var РїРµСЂРµРјРµРЅРЅР°СЏ DOUBLE
+	 * @return С†РµР»РѕРµ С‡РёСЃР»Рѕ INT_B */
 	INT_B integer(DOUBLE var){
 		return INT_B(var);
 	}
-	/** Дробная часть
-	 * @param var переменная FLOAT
-	 * @return значение FLOAT */
+	/** Р”СЂРѕР±РЅР°СЏ С‡Р°СЃС‚СЊ
+	 * @param var РїРµСЂРµРјРµРЅРЅР°СЏ FLOAT
+	 * @return Р·РЅР°С‡РµРЅРёРµ FLOAT */
 	FLOAT fraction(FLOAT var){
 		var-=INT_L(var);
 		return var;
 	}
-	/** Дробная часть
-	 * @param var переменная DOUBLE
-	 * @return значение DOUBLE */
+	/** Р”СЂРѕР±РЅР°СЏ С‡Р°СЃС‚СЊ
+	 * @param var РїРµСЂРµРјРµРЅРЅР°СЏ DOUBLE
+	 * @return Р·РЅР°С‡РµРЅРёРµ DOUBLE */
 	DOUBLE fraction(DOUBLE var){
 		var-=INT_L(var);
 		return var;
 	}
-	/** Целая часть
-	 * @param var переменная FLOAT
-	 * @return значение INT_L */
+	/** Р¦РµР»Р°СЏ С‡Р°СЃС‚СЊ
+	 * @param var РїРµСЂРµРјРµРЅРЅР°СЏ FLOAT
+	 * @return Р·РЅР°С‡РµРЅРёРµ INT_L */
 	INT_L whole(FLOAT var){
 		var-=integer(var);
 		INT_L res=var*1000;
 		return d10(res);
 	}
-	/** Целая часть
-	 * @param var переменная DOUBLE
-	 * @return значение INT_B */
+	/** Р¦РµР»Р°СЏ С‡Р°СЃС‚СЊ
+	 * @param var РїРµСЂРµРјРµРЅРЅР°СЏ DOUBLE
+	 * @return Р·РЅР°С‡РµРЅРёРµ INT_B */
 	INT_B whole(DOUBLE var){
 		var-=integer(var);
 		INT_B res=var*1000000;
 		return d10(res);
 	}
-	/** Получение шестнадтиричного значения байта
-	 * @param b байт 
-	 * @return HEX значение	*/
+	/** РџРѕР»СѓС‡РµРЅРёРµ С€РµСЃС‚РЅР°РґС‚РёСЂРёС‡РЅРѕРіРѕ Р·РЅР°С‡РµРЅРёСЏ Р±Р°Р№С‚Р°
+	 * @param b Р±Р°Р№С‚ 
+	 * @return HEX Р·РЅР°С‡РµРЅРёРµ	*/
 	STRING Hex(BYTE b,LOGIC sg=false){
 		STRING st(16);
   	st="0123456789";st+=sg?"ABCDEF":"abcdef";

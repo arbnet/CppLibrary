@@ -1,20 +1,20 @@
-/** Изюминки для отладки
- * Библиотека OWNI */
+/** РР·СЋРјРёРЅРєРё РґР»СЏ РѕС‚Р»Р°РґРєРё
+ * Р‘РёР±Р»РёРѕС‚РµРєР° OWNI */
 
 #ifndef FILE_zests
 
 #include <clocale>
 #include <cstdlib>
-#include "_calc.h"
 #include "_interface.h"
+#include "_calc.h"
 
-/** Пространство имёт от _zests */
+/** РџСЂРѕСЃС‚СЂР°РЅСЃС‚РІРѕ РёРјС‘С‚ РѕС‚ _zests */
 namespace z {
 	using namespace std;
 	
 	void dump(POINTER pnt,INT_W size){
 		cout<<endl<<"#address\t0  1  2  3  4  5  6  7\t\t~~dump~~"<<endl;
-		tab(56,'-');cout<<endl<<hex;
+		i::tab(56,'-');cout<<endl<<hex;
 		BYTE val,col=0;
 		STRING txt("        ");
 		while(size>0){
@@ -34,7 +34,7 @@ namespace z {
 			if(col<3)cout<<'\t';
 			cout<<"\t\t"<<txt<<endl;
 		}
-		tab(56,'-');cout<<dec<<endl;
+		i::tab(56,'-');cout<<dec<<endl;
 	}
 	template <typename dTYPE>
 	void dump(const dTYPE &var){
@@ -70,11 +70,11 @@ namespace z {
 	}*/
 
 	
-	/** Пауза */
+	/** РџР°СѓР·Р° */
 	void p(){
 		cout<<endl;system("pause");
 	}
-	/** Включение кирилицы */
+	/** Р’РєР»СЋС‡РµРЅРёРµ РєРёСЂРёР»РёС†С‹ */
 	void r(){setlocale(LC_ALL,"");}
 }
 
