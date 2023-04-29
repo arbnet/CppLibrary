@@ -1,11 +1,11 @@
-// Обработка ошибок
+// РћР±СЂР°Р±РѕС‚РєР° РѕС€РёР±РѕРє
 
 #ifndef FILE_error
 
 #include <iostream>
 using namespace std;
 
-/** Класс ошибки */
+/** РљР»Р°СЃСЃ РѕС€РёР±РєРё */
 class Error {
 	bool exi;
 	const char* msg;
@@ -13,11 +13,11 @@ public:
 	static const char* func;
 	static const char* file;
 	static unsigned int line;
-	/** Конструктор
-	 * @param msg сообщение
-	 * @param exi признак продолжения */
+	/** РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ
+	 * @param msg СЃРѕРѕР±С‰РµРЅРёРµ
+	 * @param exi РїСЂРёР·РЅР°Рє РїСЂРѕРґРѕР»Р¶РµРЅРёСЏ */
 	Error(const char* msg,bool exi=false):msg(msg),exi(exi){}
-	/** Вывод информации о ошибке */
+	/** Р’С‹РІРѕРґ РёРЅС„РѕСЂРјР°С†РёРё Рѕ РѕС€РёР±РєРµ */
 	void info(){
 		cout<<endl<<file<<' '<<func<<':'<<line<<' '<<msg;
 		if(!exi)exit(1);
@@ -28,9 +28,9 @@ const char*  Error::file=__FILE__;
 unsigned int Error::line=__LINE__;
 
 namespace e{
-	/** Вывод информации о исключении
-	 * @param tpe тип исключения
-	 * @param msg сообщение */
+	/** Р’С‹РІРѕРґ РёРЅС„РѕСЂРјР°С†РёРё Рѕ РёСЃРєР»СЋС‡РµРЅРёРё
+	 * @param tpe С‚РёРї РёСЃРєР»СЋС‡РµРЅРёСЏ
+	 * @param msg СЃРѕРѕР±С‰РµРЅРёРµ */
 	void Excep(const char* tpe,const char* msg){
 		cout<<endl<<Error::file<<' '<<Error::func<<':'<<Error::line<<' '<<tpe<<' '<<msg;
 	}
