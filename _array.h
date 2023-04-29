@@ -155,7 +155,7 @@ ID_TYPE(33,Array<POINTER>)
 ID_TYPE(34,Array<DATETIME>)
 ID_TYPE(35,Array<STRING>)
 
-/** Аргументы */
+/* * Аргументы * /
 class Args {
 private:
 	LOGIC dbl=false;
@@ -192,10 +192,10 @@ public:
 		}
 		return *(ANY*)(*apr)[index];
 	}
-	/*template<typename... aARG>
+	/ *template<typename... aARG>
 	void Set(aARG... args){
 		this->Clear();(apr->Put(args), ...);
-	}*/
+	}* /
 	template <typename dTYPE>
 	void Put(dTYPE val){
 		ANY *vdt=new ANY(val);apr->Put(vdt);
@@ -244,7 +244,7 @@ public:
 };
 ID_TYPE(17,Args)
 
-/** Ассоциативный массив */
+/* * Ассоциативный массив * /
 class Associative {
 private:
 	Array<POINTER> *apr;
@@ -323,6 +323,8 @@ public:
 	}
 };
 ID_TYPE(18,Associative)
+*/
+
 /*
 #ifdef FILE_zests
 namespace a {
