@@ -571,10 +571,8 @@ public:
 	#ifdef _GLIBCXX_IOSTREAM
 	friend std::ostream& operator<<(std::ostream &out,const LINK &obj){
 		if(obj.pnt){
-			switch(obj.idt){//,
-			//(*(LOGIC*)obj.pnt?"true":"false")
-			//boolalpha<<*(LOGIC*)obj.pnt<<noboolalpha
-				case 1:	out<<*(LOGIC*)obj.pnt;break;
+			switch(obj.idt){
+				case 1:	out<<boolalpha<<*(LOGIC*)obj.pnt<<noboolalpha;break;
 				case 2:	out<<*(LETTER*)obj.pnt;break;
 				case 3:	out<<(INT_S)*(RANGE*)obj.pnt;break;
 				case 4:	out<<(INT_W)*(BYTE*)obj.pnt;break;
@@ -604,6 +602,7 @@ private:
 	LINK lnk;
 	void Clear(){
 		if(lnk){
+			cout<<"lnk="<<lnk.Type()<<' '<<lnk<<endl;
 			switch(lnk.Id()){
 				case 1:	delete static_cast<LOGIC*>(*lnk);break;
 				case 2:	delete static_cast<LETTER*>(*lnk);break;

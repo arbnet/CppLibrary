@@ -83,6 +83,10 @@ public:
 		}
 		return res;
 	}
+	template<typename... aARG>
+	void Set(aARG... args){
+		this->Clear();(this->Put(args), ...);
+	}
 	void Put(dTYPE val,INT_L index=0){
 		INT_L ntx=mdt->rv?4294967295:mdt->tl;
 		if(mdt->sz!=ntx){
@@ -129,14 +133,15 @@ public:
 	#ifdef _GLIBCXX_IOSTREAM
 	friend std::ostream& operator<< (std::ostream &out,const Array<dTYPE> &oar){
 		Array<dTYPE> obj(oar);INT_L sz=obj.Size();
-		if(sz){out<<std::endl<<'{'<<std::endl;
+		out<<std::endl;
+		if(sz){out<<'{'<<std::endl;
 			INT_L ix=oar.ix+1;
 			for(INT_L nx=0;nx++<sz;){i::tab(1);
 				out<<'['<<nx<<']'<<(ix==nx?'>':' ')<<obj[nx]<<std::endl;
 			}
 			out<<'}';
 		}else out<<"NULL";
-		return out;
+		return out<<std::endl;
 	}
 	#endif
 };
@@ -205,6 +210,8 @@ public:
 	ANY Take(INT_L index=0){
 		ANY res;
 		if(apr->Size()){
+			//ANY *any=(ANY*)apr->Take(index);
+			//res=*any;delete any;
 			POINTER pnt=apr->Take(index);
 			res=*(ANY*)pnt;
 			delete static_cast<ANY*>(pnt);
