@@ -84,8 +84,8 @@ public:
 		return res;
 	}
 	template<typename... aARG>
-	void Set(aARG... args){
-		this->Clear();(this->Put(args), ...);
+	void Add(aARG... args){
+		(this->Put(args), ...);
 	}
 	void Put(dTYPE val,INT_L index=0){
 		INT_L ntx=mdt->rv?4294967295:mdt->tl;
@@ -116,9 +116,6 @@ public:
 			mdt->vars[index]=val;
 		}
 	}
-	//void Add(int cnt,dTYPE... vals){
-	//	(this->Put(vals), ...);
-	//}
 	dTYPE Take(INT_L index=-1){
 		dTYPE val;
 		if(mdt->sz){
@@ -159,21 +156,61 @@ ID_TYPE(30,Array<INT_B>)
 ID_TYPE(31,Array<FLOAT>)
 ID_TYPE(32,Array<DOUBLE>)
 ID_TYPE(33,Array<POINTER>)
-ID_TYPE(34,Array<DATETIME>)
+//ID_TYPE(34,Array<DATETIME>)
 ID_TYPE(35,Array<STRING>)
 
 /** Аргументы */
+class Args :public Array<POINTER> {
+public:
+	Args(){}
+	template<typename... aARG>
+	Args(aARG... args){(this->Put(args), ...);}
+
+	ANY& operator[](INT_L index){
+		if(!this->Size())Array<POINTER>::Put(new ANY);
+		return *(ANY*)Array<POINTER>::operator[](index);
+	}
+	template <typename dTYPE>
+	void Put(dTYPE val){
+		Array<POINTER>::Put(new ANY(val));
+	}
+	ANY Take(INT_L index=0){
+		ANY res;
+		if(this->Size()){
+			POINTER pnt=Array<POINTER>::operator[](index);
+			res=*(ANY*)pnt;delete static_cast<ANY*>(pnt);
+		}
+		return res;
+	}
+	#ifdef _GLIBCXX_IOSTREAM
+	friend std::ostream& operator<<(std::ostream &out,const Args &oar){
+		Args obj(oar);INT_L sz=obj.Size();
+		out<<std::endl;
+		if(sz){out<<'{'<<std::endl;
+			INT_L ix=obj.Index();
+			for(INT_L nx=0;nx++<sz;){i::tab(1);
+				out<<'['<<nx<<']'<<(ix==nx?'>':' ')<<obj[nx]<<std::endl;
+			}
+			out<<'}';
+		}else out<<"NULL";
+		return out<<std::endl;
+	}
+	#endif
+};
+ID_TYPE(17,Args)
+
+/* * Аргументы * /
 class Args {
 private:
-	LOGIC dbl=false;
-	Array<POINTER> *apr;	
-	void Init(){this->apr=new Array<POINTER>;}
+	//LOGIC dbl=false;
+	Array<POINTER> apr;	
+	//void Init(){this->apr=new Array<POINTER>;}this->Init();this->Init();
 public:
-	Args(){this->Init();}
+	Args(){}
 	template<typename... aARG>
-	Args(aARG... args){this->Init();(this->Put(args), ...);}
-	Args(const Args &obj): apr(obj.apr),dbl(true){};
-	~Args(){if(!this->dbl)delete this->apr;}
+	Args(aARG... args){(this->Put(args), ...);}
+	//Args(const Args &obj): apr(obj.apr),dbl(true){};
+	//~Args(){if(!this->dbl)delete this->apr;}
 	void Clear(){
 		if(this->dbl){this->Init();this->dbl=false;}
 		else if(apr->Size()){apr->Reset();
@@ -183,21 +220,19 @@ public:
 			apr->Clear();
 		}
 	}
-	INT_L Size(){return apr->Size();}
-	INT_L Total(){return apr->Total();}
-	INT_L Index(){return apr->Index();}
-	INT_L Reserve(){return apr->Reserve();}
-	void Reset(){apr->Reset();}
-	void Index(INT_L ix){apr->Index(ix);}
-	void How(LOGIC hw){apr->How(hw);}
-	void Reserve(INT_L rv){apr->Reserve(rv);}
-	LOGIC Next(){return apr->Next();}
-	operator bool(){return apr->Size()?true:false;}
+	INT_L Size(){return apr.Size();}
+	INT_L Total(){return apr.Total();}
+	INT_L Index(){return apr.Index();}
+	INT_L Reserve(){return apr.Reserve();}
+	void Reset(){apr.Reset();}
+	void Index(INT_L ix){apr.Index(ix);}
+	void How(LOGIC hw){apr.How(hw);}
+	void Reserve(INT_L rv){apr.Reserve(rv);}
+	LOGIC Next(){return apr.Next();}
+	operator bool(){return (LOGIC)apr;}
 	ANY& operator[](INT_L index){
-		if(!apr->Size()){
-			ANY *vdt=new ANY;apr->Put((POINTER)vdt);
-		}
-		return *(ANY*)(*apr)[index];
+		if(!apr.Size())apr.Put((POINTER)new ANY);
+		return *(ANY*)apr[index];
 	}
 	template<typename... aARG>
 	void Set(aARG... args){
@@ -232,21 +267,22 @@ public:
 		return res;
 	}
 	#ifdef _GLIBCXX_IOSTREAM
-	friend std::ostream& operator<< (std::ostream &out,const Args &oar){
+	friend std::ostream& operator<<(std::ostream &out,const Args &oar){
 		Args obj(oar);INT_L sz=obj.Size();
-		if(sz){out<<std::endl<<'{'<<std::endl;
+		out<<std::endl;
+		if(sz){out<<'{'<<std::endl;
 			INT_L ix=obj.Index();
 			for(INT_L nx=0;nx++<sz;){i::tab(1);
 				out<<'['<<nx<<']'<<(ix==nx?'>':' ')<<obj[nx]<<std::endl;
 			}
 			out<<'}';
 		}else out<<"NULL";
-		return out;
+		return out<<std::endl;
 	}
 	#endif
 };
 ID_TYPE(17,Args)
-
+*/
 /* * Ассоциативный массив * /
 class Associative {
 private:

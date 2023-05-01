@@ -1,17 +1,26 @@
 /** Типы данных
  * Библиотека OWNI */
 
-#ifndef FILE_types
+#pragma once
+#define FILE_types
 
-#include <string>
+#ifdef TYPE_DATETIME
 #include "time.h"
-using namespace std;
+#endif
 
 /** Пустые макросы _error */
 #ifndef FILE_error
 #define FIX
 #define TRY
 #define CATCH
+#endif
+
+#ifndef NULL
+#ifndef __cplusplus
+#define NULL ((void *)0)
+#else
+#define NULL 0
+#endif
 #endif
 
 typedef bool LOGIC;// Логический тип 0..1
@@ -31,6 +40,34 @@ typedef void* POINTER;// Указатель
 /** Массив символов */
 #define CHARS(ltr) const char ltr[]
 
+/** Структура типа Id и Name */
+template<typename dTYPE> struct Type {
+	/** Id типа */
+	static const INT_W Id=0;
+	/** Name типа */
+	static constexpr char Name[]="UNKNOWN";
+};
+/** Добавление ID типа */
+#define ID_TYPE(nID,dTYPE) \
+template<> struct Type<dTYPE> {\
+	static const INT_W Id=nID;\
+	static constexpr char Name[]=#dTYPE;\
+};
+
+ID_TYPE(1,LOGIC)
+ID_TYPE(2,LETTER)
+ID_TYPE(3,RANGE)
+ID_TYPE(4,BYTE)
+ID_TYPE(5,INT_S)
+ID_TYPE(6,INT_W)
+ID_TYPE(7,INT_M)
+ID_TYPE(8,INT_L)
+ID_TYPE(9,INT_T)
+ID_TYPE(10,INT_B)
+ID_TYPE(11,FLOAT)
+ID_TYPE(12,DOUBLE)
+ID_TYPE(13,POINTER)
+
 /** Структура битов .b0..b7 */
 struct Bits {
 	unsigned b0:1;
@@ -42,7 +79,6 @@ struct Bits {
 	unsigned b6:1;
 	unsigned b7:1;
 };
-
 /** Структура байтов .b0..b7 */
 struct Bytes {
 	BYTE b0;
@@ -54,7 +90,18 @@ struct Bytes {
 	BYTE b6;
 	BYTE b7;
 };
+/** Союз BYTE & Bits */
+union Code {
+	BYTE byte;
+	Bits bit;
+};
+/** Союз INT_B & Bytes */
+union Block {
+	INT_B numb;
+	Bytes byte;
+};
 
+#ifdef TYPE_DATETIME
 /** Структура даты-времени */
 struct DateTime {
 	int seconds;
@@ -67,24 +114,12 @@ struct DateTime {
 	int yday;
 	int summer;
 };
-
-/** Союз BYTE & Bits */
-union Code {
-	BYTE byte;
-	Bits bit;
-};
-
-/** Союз INT_B & Bytes */
-union Block {
-	INT_B numb;
-	Bytes byte;
-};
-
 /** Союз tm & DateTime */
-union DatetimeU {
+union DateTimeU {
 	struct tm stm;
 	DateTime dtm;
 };
+#endif
 
 /** Пространство имёт от _types */
 namespace t {
@@ -104,13 +139,23 @@ namespace t {
 	/** Ниличие типа в перечне */
 	template <typename dTYPE, typename ...aTYPE>
 	struct IsMatch{static constexpr bool v{(Match<dTYPE,aTYPE>::v || ...)};};
+	/** Проверка на основной тип данных */
+	template <typename dTYPE>
+	constexpr bool isBase=IsMatch<dTYPE,LOGIC,LETTER,RANGE,BYTE,INT_S,INT_W,INT_M,INT_L,INT_T,INT_B,FLOAT,DOUBLE,POINTER>::v;
 
 	/** Поменять местами переменные
-	 * @param var1 переменная 1
-	 * @param var2 переменная 2	*/
+	 * @param vr1 переменная 1
+	 * @param vr2 переменная 2	*/
 	template <typename dTYPE>
-	void Swap(dTYPE &var1, dTYPE &var2){
-		dTYPE tmp(var1);var1=var2;var2=tmp;
+	void Swap(dTYPE &vr1, dTYPE &vr2){
+		dTYPE tmp(vr1);vr1=vr2;vr2=tmp;
+	}
+	/** Поменять местами указатели
+	 * @param vr1 указатель переменной 1
+	 * @param vr2 указатель переменной 2	*/
+	template <typename dTYPE>
+	void Swap(dTYPE *vr1, dTYPE *vr2){
+		dTYPE tmp(*vr1);*vr1=*vr2;*vr2=tmp;
 	}
 	/** Сдвиг указателя
 	 * @param pnt указатель
@@ -279,6 +324,7 @@ namespace t {
 	}
 }
 
+#if defined TYPE_STRING || defined TYPE_DATETIME || defined TYPE_LINK || defined TYPE_ANY
 /** Строка */
 class STRING {
 struct Data {
@@ -434,7 +480,10 @@ public:
 	}
 	#endif
 };
+ID_TYPE(15,STRING)
+#endif
 
+#ifdef TYPE_DATETIME
 /** ДатаВремя */
 class DATETIME {
 private:
@@ -471,47 +520,11 @@ public:
 		return STRING(res);
 	}
 };
-
-/** Структура типа Id и Name */
-template<typename dTYPE> struct Type {
-	/** Id типа */
-	static const INT_W Id=0;
-	/** Name типа */
-	static constexpr char Name[]="UNKNOWN";
-};
-
-/** Добавление ID типа */
-#define ID_TYPE(nID,dTYPE) \
-template<> struct Type<dTYPE> {\
-	static const INT_W Id=nID;\
-	static constexpr char Name[]=#dTYPE;\
-};
-
-ID_TYPE(1,LOGIC)
-ID_TYPE(2,LETTER)
-ID_TYPE(3,RANGE)
-ID_TYPE(4,BYTE)
-ID_TYPE(5,INT_S)
-ID_TYPE(6,INT_W)
-ID_TYPE(7,INT_M)
-ID_TYPE(8,INT_L)
-ID_TYPE(9,INT_T)
-ID_TYPE(10,INT_B)
-ID_TYPE(11,FLOAT)
-ID_TYPE(12,DOUBLE)
-ID_TYPE(13,POINTER)
 ID_TYPE(14,DATETIME)
-ID_TYPE(15,STRING)
+#endif
 
 /** Пространство имёт от _types */
 namespace t{
-	/** Все основные типы данных */
-	template <typename dTYPE>
-	constexpr bool isBaseA=IsMatch<dTYPE,LOGIC,LETTER,RANGE,BYTE,INT_S,INT_W,INT_M,INT_L,INT_T,INT_B,FLOAT,DOUBLE,POINTER,DATETIME,STRING>::v;
-	/** Основные типы данных */
-	template <typename dTYPE>
-	constexpr bool isBaseB=IsMatch<dTYPE,LOGIC,LETTER,RANGE,BYTE,INT_S,INT_W,INT_M,INT_L,INT_T,INT_B,FLOAT,DOUBLE,POINTER>::v;
-
 	/** Конвертация типа данных
 	 * @param val значение
 	 * @return значение с новым типом */
@@ -530,6 +543,7 @@ namespace t{
 	}
 };
 
+#ifdef TYPE_LINK
 /* Ссылка */
 class LINK {
 private:
@@ -546,7 +560,7 @@ public:
 	operator dTYPE(){return *(dTYPE*)pnt;}
 	explicit operator bool(){return pnt?true:false;}
 	template<typename dTYPE>
-	t::Enable<t::isBaseB<dTYPE>,LINK&> operator=(dTYPE val){
+	t::Enable<t::isBase<dTYPE>,LINK&> operator=(dTYPE val){
 		TRY
 		if(idt==::Type<dTYPE>::Id)*(dTYPE*)pnt=val;
 		#ifdef FILE_error
@@ -585,7 +599,7 @@ public:
 				case 11:out<<*(FLOAT*)obj.pnt;break;
 				case 12:out<<*(DOUBLE*)obj.pnt;break;
 				case 13:out<<*(POINTER*)obj.pnt;break;
-				case 14:out<<*(DATETIME*)obj.pnt;break;
+				//case 14:out<<*(DATETIME*)obj.pnt;break;
 				case 15:out<<*(STRING*)obj.pnt;break;
 				default:out<<obj.vtp;
 			}
@@ -595,14 +609,15 @@ public:
 	#endif
 };
 ID_TYPE(16,LINK)
+#endif
 
+#ifdef TYPE_ANY
 /** Любой тип */
 class ANY {
 private:
 	LINK lnk;
 	void Clear(){
 		if(lnk){
-			cout<<"lnk="<<lnk.Type()<<' '<<lnk<<endl;
 			switch(lnk.Id()){
 				case 1:	delete static_cast<LOGIC*>(*lnk);break;
 				case 2:	delete static_cast<LETTER*>(*lnk);break;
@@ -821,6 +836,7 @@ public:
 	#endif
 }; 
 ID_TYPE(20,ANY)
+#endif
 
 namespace t {
 	/** Получение Id переменной
@@ -834,10 +850,7 @@ namespace t {
 	 * @param var переменная 
 	 * @return тип переменной */
 	template<typename dTYPE>
-	STRING Type(dTYPE var){
-		return STRING(::Type<dTYPE>::Name);
+	const LETTER* Type(dTYPE var){
+		return ::Type<dTYPE>::Name;
 	}
 };
-
-#define FILE_types
-#endif
