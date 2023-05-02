@@ -1,9 +1,10 @@
 /** Массивы
  * Библиотека OWNI */
 
-#ifndef FILE_array
+#pragma once
+#define FILE_array
 
-#include "_types.h"
+#include "_types.hpp"
 
 /** Структура КлючЗначение */
 struct KeyValue {
@@ -37,7 +38,7 @@ public:
 	operator bool(){return mdt->sz?true:false;}
 	dTYPE& operator[](INT_L index){
 		if(index==0)index=this->ix;
-		else t::Index(index,mdt->sz);
+		else z::Index(index,mdt->sz);
 		return mdt->vars[index];
 	}
 	Array<dTYPE>& operator=(const Array<dTYPE> &oar){
@@ -60,7 +61,7 @@ public:
 		Index(how?-1:0);this->how=how;
 	}
 	void Index(INT_L index){
-		t::Index(index,mdt->sz);this->ix=index;
+		z::Index(index,mdt->sz);this->ix=index;
 	}
 	void Reset(){
 		Index(this->how?-1:0);
@@ -91,10 +92,10 @@ public:
 		INT_L ntx=mdt->rv?4294967295:mdt->tl;
 		if(mdt->sz!=ntx){
 			if(index==0)index=mdt->sz;
-			else t::Index(index,mdt->sz);
+			else z::Index(index,mdt->sz);
 			mdt->sz++;
 			if(mdt->rv){
-				ntx=t::Volume(mdt->sz,mdt->rv);
+				ntx=z::Volume(mdt->sz,mdt->rv);
 				if(mdt->tl!=ntx){
 					dTYPE *vars=new dTYPE[ntx] ;
 					if(mdt->tl){INT_L nx=0;
@@ -119,7 +120,7 @@ public:
 	dTYPE Take(INT_L index=-1){
 		dTYPE val;
 		if(mdt->sz){
-			t::Index(index,mdt->sz);
+			z::Index(index,mdt->sz);
 			val=mdt->vars[index];mdt->sz--;
 			while(index<mdt->sz){
 				mdt->vars[index]=mdt->vars[index+1];index++;
@@ -156,7 +157,7 @@ ID_TYPE(30,Array<INT_B>)
 ID_TYPE(31,Array<FLOAT>)
 ID_TYPE(32,Array<DOUBLE>)
 ID_TYPE(33,Array<POINTER>)
-//ID_TYPE(34,Array<DATETIME>)
+ID_TYPE(34,Array<DATETIME>)
 ID_TYPE(35,Array<STRING>)
 
 /** Аргументы */
@@ -165,7 +166,15 @@ public:
 	Args(){}
 	template<typename... aARG>
 	Args(aARG... args){(this->Put(args), ...);}
-
+	~Args(){this->Clear();}
+	void Clear(){
+		if(this->Size()){this->Reset();
+			do{
+				delete static_cast<ANY*>(Array<POINTER>::operator[](0));
+			}while(this->Next());
+			Array<POINTER>::Clear();
+		}
+	}
 	ANY& operator[](INT_L index){
 		if(!this->Size())Array<POINTER>::Put(new ANY);
 		return *(ANY*)Array<POINTER>::operator[](index);
@@ -197,7 +206,21 @@ public:
 	}
 	#endif
 };
-ID_TYPE(17,Args)
+ID_TYPE(36,Args)
+
+namespace a {
+	template<typename dTYPE>
+	INT_L Find(Array<dTYPE> obj,const dTYPE val){
+		INT_L res=0,idx=obj.Index();
+		if(obj.Size()){obj.Reset();
+			do{
+				if(obj[0]==val){res=obj.Index();break;}
+			}while(obj.Next());
+			obj.Index(idx);
+		}
+		return res;
+	}
+}
 
 /* * Аргументы * /
 class Args {
@@ -387,6 +410,3 @@ namespace a {
 	}
 }
 #endif*/
-
-#define FILE_array
-#endif

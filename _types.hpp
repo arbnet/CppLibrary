@@ -4,9 +4,9 @@
 #pragma once
 #define FILE_types
 
-#ifdef TYPE_DATETIME
-#include "time.h"
-#endif
+#include <typeinfo>
+#include <cstdlib>
+#include <ctime>
 
 /** Пустые макросы _error */
 #ifndef FILE_error
@@ -35,10 +35,8 @@ typedef __INT64_TYPE__ INT_T;// Целое число -9223372036854775808..9223
 typedef __UINT64_TYPE__ INT_B;// Целое число 0..18446744073709551615
 typedef float FLOAT;// Плавающее число 1.8E-38..1.8E+38		32b точность 6 .3 знаков
 typedef double DOUBLE;// Плавающее число двойной точности 2.2E-308..1.8E+308	64b	точность 15 .6 знаков
-typedef void* POINTER;// Указатель
-
-/** Массив символов */
-#define CHARS(ltr) const char ltr[]
+typedef void* ADDRESS;// Указатель адреса
+typedef const char* CHARS;// Указатель на массив символов
 
 /** Структура типа Id и Name */
 template<typename dTYPE> struct Type {
@@ -66,7 +64,8 @@ ID_TYPE(9,INT_T)
 ID_TYPE(10,INT_B)
 ID_TYPE(11,FLOAT)
 ID_TYPE(12,DOUBLE)
-ID_TYPE(13,POINTER)
+ID_TYPE(13,ADDRESS)
+ID_TYPE(14,CHARS)
 
 /** Структура битов .b0..b7 */
 struct Bits {
@@ -101,7 +100,6 @@ union Block {
 	Bytes byte;
 };
 
-#ifdef TYPE_DATETIME
 /** Структура даты-времени */
 struct DateTime {
 	int seconds;
@@ -119,7 +117,6 @@ union DateTimeU {
 	struct tm stm;
 	DateTime dtm;
 };
-#endif
 
 /** Пространство имёт от _types */
 namespace t {
@@ -141,257 +138,165 @@ namespace t {
 	struct IsMatch{static constexpr bool v{(Match<dTYPE,aTYPE>::v || ...)};};
 	/** Проверка на основной тип данных */
 	template <typename dTYPE>
-	constexpr bool isBase=IsMatch<dTYPE,LOGIC,LETTER,RANGE,BYTE,INT_S,INT_W,INT_M,INT_L,INT_T,INT_B,FLOAT,DOUBLE,POINTER>::v;
-
-	/** Поменять местами переменные
-	 * @param vr1 переменная 1
-	 * @param vr2 переменная 2	*/
+	constexpr bool isBase=IsMatch<dTYPE,LOGIC,LETTER,RANGE,BYTE,INT_S,INT_W,INT_M,INT_L,INT_T,INT_B,FLOAT,DOUBLE,ADDRESS>::v;
+	/** Проверка на целочисленный тип данных */
 	template <typename dTYPE>
-	void Swap(dTYPE &vr1, dTYPE &vr2){
-		dTYPE tmp(vr1);vr1=vr2;vr2=tmp;
-	}
-	/** Поменять местами указатели
-	 * @param vr1 указатель переменной 1
-	 * @param vr2 указатель переменной 2	*/
+	constexpr bool isInteger=IsMatch<dTYPE,RANGE,BYTE,INT_S,INT_W,INT_M,INT_L,INT_T,INT_B>::v;
+	/** Проверка на дробный тип данных */
 	template <typename dTYPE>
-	void Swap(dTYPE *vr1, dTYPE *vr2){
-		dTYPE tmp(*vr1);*vr1=*vr2;*vr2=tmp;
-	}
-	/** Сдвиг указателя
-	 * @param pnt указатель
-	 * @param shift смещение */
-	template <typename dTYPE>
-	void Shift(dTYPE* &pnt,INT_S shift=1){
-		pnt+=shift;
-	}
-	/** Сдвиг указателя
-	 * @param pnt указатель
-	 * @param shift смещение */
-	void Shift(POINTER &pnt,INT_S shift=1){
-		pnt=(POINTER*)((INT_B)pnt+shift);
-	}
-	/** Заполнение памяти значением
-	 * @param pnt указатель адреса
-	 * @param size размер\\длинна
-	 * @param val значение */
-	template <typename dTYPE=BYTE>
-	void Fill(POINTER &pnt,INT_W size,dTYPE val=0){
-		while(size>0){
-			*(dTYPE*)pnt=val;Shift(pnt,sizeof(dTYPE));size--;
-		}
-	}
-	/** Копирование в памяти
-	 * @param pnt1 указатель адреса 1
-	 * @param pnt2 указатель адреса 2
-	 * @param size размер */
-	void Copy(POINTER &pnt1,POINTER &pnt2,INT_M size){
-		INT_W ct;
-		if(size>0){
-			ct=size/8;
-			if(ct>0){size=size%8;
-				do{
-					*(INT_B*)pnt1=*(INT_B*)pnt2;
-					Shift(pnt1,8);Shift(pnt2,8);ct--;
-				}while(ct>0);
-			}
-			ct=size/4;
-			if(ct>0){size=size%4;
-				do{
-					*(INT_L*)pnt1=*(INT_L*)pnt2;
-					Shift(pnt1,4);Shift(pnt2,4);ct--;
-				}while(ct>0);
-			}
-			ct=size/2;
-			if(ct>0){size=size%2;
-				do{
-					*(INT_W*)pnt1=*(INT_W*)pnt2;
-					Shift(pnt1,2);Shift(pnt2,2);ct--;
-				}while(ct>0);
-			}
-			if(size>0){ct=size;
-				do{
-					*(BYTE*)pnt1=*(BYTE*)pnt2;
-					Shift(pnt1,1);Shift(pnt2,1);ct--;
-				}while(ct>0);
-			}
-		}else{size=-size;
-			ct=size/8;
-			if(ct>0){size=size%8;
-				do{
-					Shift(pnt1,-8);Shift(pnt2,-8);ct--;
-					*(INT_B*)pnt1=*(INT_B*)pnt2;
-				}while(ct>0);
-			}
-			ct=size/4;
-			if(ct>0){size=size%4;
-				do{
-					Shift(pnt1,-4);Shift(pnt2,-4);ct--;
-					*(INT_L*)pnt1=*(INT_L*)pnt2;
-				}while(ct>0);
-			}
-			ct=size/2;
-			if(ct>0){size=size%2;
-				do{
-					Shift(pnt1,-2);Shift(pnt2,-2);ct--;
-					*(INT_W*)pnt1=*(INT_W*)pnt2;
-				}while(ct>0);
-			}
-			if(size>0){ct=size;
-				do{
-					Shift(pnt1,-1);Shift(pnt2,-1);ct--;
-					*(BYTE*)pnt1=*(BYTE*)pnt2;
-				}while(ct>0);
-			}
-		}
-	}
-	/** Сравнение памяти
-	 * @param pnt1 указатель адреса 1
-	 * @param pnt2 указатель адреса 2
-	 * @param size размер\\длинна */
-	LOGIC Compare(POINTER pnt1,POINTER pnt2,INT_W size){
-		LOGIC res=true;
-		while(size>0){
-			if(size>=8){
-				if(*(INT_B*)pnt1!=*(INT_B*)pnt2)res=false;
-				else{Shift(pnt1,8);Shift(pnt2,8);size-=8;}
-			}else if(size>=4){
-				if(*(INT_L*)pnt1!=*(INT_L*)pnt2)res=false;
-				else{Shift(pnt1,4);Shift(pnt2,4);size-=4;}
-			}else if(size>=2){
-				if(*(INT_W*)pnt1!=*(INT_W*)pnt2)res=false;
-				else{Shift(pnt1,2);Shift(pnt2,2);size-=2;}
-			}else{
-				if(*(BYTE*)pnt1!=*(BYTE*)pnt2)res=false;
-				else{Shift(pnt1,1);Shift(pnt2,1);size-=1;}
-			}
-			if(!res)break;
-		}
-		return res;
-	}
-	/** Валидация индекса
-	 * @param index индекс
-	 * @param size размер массива */
-	void Index(INT_W &index,INT_W size){
-		if(index>0){
-			if(size>0){
-				if(index<=size)index--;
-				else{index=~index+1;
-					if(index<=size)index=size-index;
-					else index=size-1;
-				}
-			}else index=0;
-		}
-	}
-	/** Валидация индекса
-	 * @param index индекс
-	 * @param size размер массива	*/
-	void Index(INT_L &index,INT_L size){
-		if(index>0){
-			if(size>0){
-				if(index<=size)index--;
-				else{index=~index+1;
-					if(index<=size)index=size-index;
-					else index=size-1;
-				}
-			}else index=0;
-		}
-	}
-	/** Расчёт объёма от размера и резерва
-	 * @param sz текущий размер
-	 * @param mr резерв памяти
-	 * @return значение объёма */
-	INT_W Volume(INT_W sz,INT_W mr){
-		INT_L res=mr+(sz/mr)*mr;
-		if(res>65535)res=65535;
-		return res;
-	}
-	/** Расчёт объёма от размера и резерва
-	 * @param sz текущий размер
-	 * @param mr резерв памяти
-	 * @return значение объёма */
-	INT_L Volume(INT_L sz,INT_W mr){
-		INT_B res=mr+(sz/mr)*mr;
-		if(res>4294967295)res=4294967295;
-		return res;
-	}
-	/** Получение длинны массива символов
-	 * @param ltr массив символов
-	 * @return размер массива символов */
-	INT_W Lsize(CHARS(ltr)){
-		INT_W sz=0;
-		while(ltr[sz]!='\0'){sz++;if(sz==65535)break;}
-		return sz;
-	}
-}
-
-#if defined TYPE_STRING || defined TYPE_DATETIME || defined TYPE_LINK || defined TYPE_ANY
-/** Строка */
-class STRING {
-struct Data {
-	INT_W mr=0,sz=0,tl=0;
-	LETTER* str=NULL;
+	constexpr bool isFloating=IsMatch<dTYPE,FLOAT,DOUBLE>::v;
 };
-private:
-	Data *mdt;
-	LOGIC dbl=false;
-	void Init(INT_W tl=0,INT_W mr=0){
-		if(this->dbl){
-			mdt=new Data;dbl=false;
-		}else if(mdt->str){
-			delete []mdt->str;mdt->sz=0;
-		}
-		mdt->tl=tl;mdt->mr=mr;
-		mdt->str=new LETTER[INT_L(tl+1)];
-	}
-	LETTER* Change(INT_W sz){
-		LETTER* str=NULL;
-		if(mdt->mr){
-			INT_W ntx=t::Volume(sz,mdt->mr);
-			if(mdt->tl!=ntx){
-				mdt->tl=ntx;str=new LETTER[INT_L(ntx+1)];
-			}
-		}
-		return str;
-	}
-	void Assign(POINTER pnt,INT_W sz){
-		if(LETTER* str=this->Change(sz)){
-			delete []mdt->str;mdt->str=str;
-		}else{
-			if(mdt->tl<sz)sz=mdt->tl;
-		}
-		POINTER adr=mdt->str;
-		if(sz)t::Copy(adr,pnt,sz);
-		*(BYTE*)adr=0;
-		if(mdt->sz!=sz)mdt->sz=sz;
-	}
-	LOGIC Compare(POINTER pnt,INT_W sz){
-		return mdt->sz==sz?t::Compare(mdt->str,pnt,sz):false;
+
+#include "_zests.hpp"
+
+/** Указатель */
+template<typename dTYPE>
+class POINTER {
+	dTYPE *pnt;
+	POINTER *obj=NULL;
+	void Kill(LOGIC grd){
+		if(obj)obj->Kill(grd);else if(!grd)delete pnt;
+		pnt=NULL;
 	}
 public:
-	STRING(const STRING &obj): mdt(obj.mdt),dbl(true){}
-	STRING(INT_W tl=0,INT_W mr=0){
-		this->mdt=new Data;if(!tl && !mr)mr=32;this->Init(tl,mr);
+	LOGIC guard=false;
+	POINTER(){pnt=new dTYPE;}
+  POINTER(dTYPE val){pnt=new dTYPE(val);}
+	POINTER(POINTER &obj):pnt(obj.pnt),obj(&obj){
+		if(obj.guard)obj.guard=false;
 	}
-	STRING(CHARS(ltr)){
-		INT_W sz=t::Lsize(ltr);
-		this->mdt=new Data;this->Init(sz,sz?0:32);
-		this->Assign((POINTER)ltr,sz);
+	~POINTER(){if(!obj)if(pnt)delete pnt;}
+	explicit operator bool(){return pnt?true:false;}
+  dTYPE& operator*(){return *(dTYPE*)pnt;}
+	dTYPE& operator=(dTYPE val){
+		if(pnt)*(dTYPE*)pnt=val;
+		return *this;
 	}
-	~STRING(){if(!this->dbl){delete []mdt->str;delete this->mdt;}}
-	operator bool(){return mdt->sz?true:false;}
-	const LETTER* operator*(){return mdt->str;}
-	LETTER& operator[](INT_L index){
-		t::Index(index,mdt->sz);
-		return mdt->str[index];
+	void Kill(){
+		if(obj)obj->Kill(guard);else delete pnt;
+		if(!guard)pnt=NULL;
 	}
+	#ifdef _GLIBCXX_IOSTREAM
+	friend std::ostream& operator<< (std::ostream &out,const POINTER &obj){
+		return obj.pnt?out<<*(dTYPE*)obj.pnt:out<<"NULL";
+	}
+	#endif
+};
+
+/** Указатель */
+template<>
+class POINTER<CHARS> {
+	void Kill(LOGIC grd){
+		if(obj)obj->Kill(grd);else if(!grd)delete pnt;
+		pnt=NULL;sz=tl=rv=0;
+	}
+protected:
+	LETTER *pnt;
+	INT_W sz=0,tl,rv;
+	POINTER<CHARS> *obj=NULL;
+	LETTER* Change(){
+		LETTER* lts=NULL;
+		if(rv){INT_W ntl=z::Volume(sz,rv);
+			if(tl!=ntl){tl=ntl;lts=new LETTER[INT_L(tl+1)];}
+		}
+		return lts;
+	}
+	void Assign(const LETTER *lts){
+		ADDRESS adr=pnt;
+		if(sz){
+			ADDRESS adl=(ADDRESS)lts;
+			z::Copy(adr,adl,sz);
+		}
+		*(BYTE*)adr=0;
+	}
+public:
+	LOGIC guard=false;
+	POINTER<CHARS>(INT_W tl=32,INT_W rv=0):tl(tl),rv(!tl && !rv?32:rv){
+		pnt=new LETTER[tl+1];*(BYTE*)pnt=0;
+	}
+	POINTER<CHARS>(const LETTER *lts){
+		sz=tl=z::Lsize(lts);rv=0;
+		pnt=new LETTER[tl+1];
+		Assign(lts);
+	}
+	POINTER<CHARS>(POINTER<CHARS> &obj):
+		pnt(obj.pnt),sz(obj.sz),tl(obj.tl),obj(&obj){
+			if(obj.guard)obj.guard=false;
+	}
+	~POINTER<CHARS>(){if(!obj)if(pnt)delete pnt;}
+	explicit operator bool(){return pnt?true:false;}
+  LETTER* operator*(){return (LETTER*)pnt;}
+	POINTER<CHARS>& operator=(const LETTER *lts){
+		if(pnt){
+			sz=z::Lsize(lts);
+			if(LETTER* npt=this->Change()){
+				delete []pnt;pnt=npt;
+			}else	if(sz>tl)sz=tl;
+			Assign(lts);
+		}
+		return *this;
+	}
+  void Kill(){
+		if(pnt){
+			if(obj)obj->Kill(guard);else delete pnt;
+			if(!guard){pnt=NULL;sz=tl=rv=0;}
+		}
+	}
+	INT_W Size(LOGIC sgn=false){
+		if(sgn)sz=z::Lsize(pnt);
+		return sz;
+	}
+	INT_W Total(){return tl;}
+	INT_W Reserve(){return rv;}
+	void Reserve(INT_W rv){this->rv=rv;}
+	#ifdef _GLIBCXX_IOSTREAM
+	friend std::ostream& operator<< (std::ostream &out,const POINTER<CHARS> &obj){
+		return obj.sz?out<<(LETTER*)obj.pnt:out<<"NULL";
+	}
+	#endif
+};
+
+//ID_TYPE(14,POINTER)
+
+/** Строка */
+class STRING :public POINTER<CHARS> {
+	/*
+	LOGIC Compare(ADDRESS pnt,INT_W sz){
+		return sz==sz?z::Compare(str,pnt,sz):false;
+	}*/
+public:
+	//STRING(const STRING &obj): mdt(obj.mdt),dbl(true){
+	//	cout<<"Cr1"<<endl;
+	//}
+	STRING(INT_W tl=0,INT_W rv=0):POINTER<CHARS>(tl,rv){}
+	STRING(const LETTER *lts):POINTER<CHARS>(lts){}
+	explicit operator bool(){return sz?true:false;}
+	template<typename dTYPE, typename = t::Enable<t::isInteger<dTYPE>,dTYPE>>
+	STRING(dTYPE val){
+		POINTER<CHARS> lts;
+		sprintf(*lts,"%d",val);lts.Size(true);
+		cout<<"VVV="<<*lts<<' '<<lts.Size()<<' '<<lts.Total()<<endl;
+		//POINTER<CHARS>::operator=(lts);
+	}
+	LETTER& operator[](INT_L idx){
+		z::Index(idx,sz);
+		return pnt[idx];
+	}
+	STRING& operator=(const LETTER *lts){
+		POINTER<CHARS>::operator=(lts);
+		return *this;
+	}
+	/*
+	
 	STRING& operator=(const LETTER *ltr){
-		this->Assign((POINTER)ltr,t::Lsize(ltr));
+		this->Assign((ADDRESS)ltr,z::Lsize(ltr));
 		return *this;
 	}
 	STRING& operator=(const STRING &obj){
-		this->Assign(obj.mdt->str,obj.mdt->sz);
+		this->Assign(obj.str,obj.sz);
 		return *this;
 	}
+	
 	STRING& operator+=(const STRING &obj){
 		this->Put(obj);
 		return *this;
@@ -401,37 +306,34 @@ public:
 		return *this;
 	}
 	LOGIC operator==(const STRING &obj){
-		return this->Compare(obj.mdt->str,obj.mdt->sz);
+		return this->Compare(obj.str,obj.sz);
 	}
 	LOGIC operator!=(const STRING &obj){
-		return !this->Compare(obj.mdt->str,obj.mdt->sz);
+		return !this->Compare(obj.str,obj.sz);
 	}
-	INT_W Size(){return mdt->sz;}
-	INT_W Total(){return mdt->tl;}
-	INT_W Reserve(){return mdt->mr;}
-	void Reserve(INT_W mr){mdt->mr=mr;}
-	void Put(const STRING &obj,INT_W index=0){
+	*/
+	/*void Put(const STRING &obj,INT_W index=0){
 		if(INT_W sz=obj.mdt->sz){
 			if(INT_L(mdt->sz+sz)>(mdt->mr?65535:mdt->tl))
 				sz=(mdt->mr?65535:mdt->tl)-mdt->sz;
 			if(sz){
 				POINTER pnt1,pnt2,pntt;
 				if(!index)index=mdt->sz;
-				else t::Index(index,mdt->sz);
+				else z::Index(index,mdt->sz);
 				if(LETTER* str=this->Change(mdt->sz+sz)){
 					pnt1=(POINTER)str;pnt2=(POINTER)mdt->str;
-					if(index)t::Copy(pnt1,pnt2,index);
+					if(index)z::Copy(pnt1,pnt2,index);
 					pntt=pnt2;pnt2=(POINTER)obj.mdt->str;
-					t::Copy(pnt1,pnt2,sz);pnt2=pntt;
-					t::Copy(pnt1,pnt2,mdt->sz-index);
+					z::Copy(pnt1,pnt2,sz);pnt2=pntt;
+					z::Copy(pnt1,pnt2,mdt->sz-index);
 					*(BYTE*)pnt1=0;
 					delete []mdt->str;mdt->str=str;
 				}else{
-					pnt1=(POINTER)mdt->str;t::Shift(pnt1,mdt->sz);
-					pnt2=pnt1;t::Shift(pnt1,sz);*(BYTE*)pnt1=0;
-					t::Copy(pnt1,pnt2,-(mdt->sz-index));
+					pnt1=(POINTER)mdt->str;z::Shift(pnt1,mdt->sz);
+					pnt2=pnt1;z::Shift(pnt1,sz);*(BYTE*)pnt1=0;
+					z::Copy(pnt1,pnt2,-(mdt->sz-index));
 					pnt1=pnt2;pnt2=(POINTER)obj.mdt->str;
-					t::Copy(pnt1,pnt2,sz);
+					z::Copy(pnt1,pnt2,sz);
 				}
 				mdt->sz+=sz;
 			}
@@ -439,20 +341,20 @@ public:
 	}
 	void Cut(INT_W index,INT_W size){
 		if(size && mdt->sz){
-			t::Index(index,mdt->sz);
+			z::Index(index,mdt->sz);
 			if(index+size>mdt->sz)size=mdt->sz-index;
 			POINTER pnt1,pnt2;
 			if(LETTER* str=this->Change(mdt->sz-size)){
 				pnt1=(POINTER)str;pnt2=(POINTER)mdt->str;
-				if(index)t::Copy(pnt1,pnt2,index);
-				t::Shift(pnt2,size);index+=size;
-				t::Copy(pnt1,pnt2,mdt->sz-index);
+				if(index)z::Copy(pnt1,pnt2,index);
+				z::Shift(pnt2,size);index+=size;
+				z::Copy(pnt1,pnt2,mdt->sz-index);
 				delete []mdt->str;mdt->str=str;
 			}else{
 				pnt1=(POINTER)mdt->str;
-				if(index)t::Shift(pnt1,index);
-				pnt2=pnt1;t::Shift(pnt2,size);
-				index+=size;t::Copy(pnt1,pnt2,mdt->sz-index);
+				if(index)z::Shift(pnt1,index);
+				pnt2=pnt1;z::Shift(pnt2,size);
+				index+=size;z::Copy(pnt1,pnt2,mdt->sz-index);
 			}
 			*(BYTE*)pnt1=0;mdt->sz-=size;
 		}
@@ -464,27 +366,21 @@ public:
 	INT_W Find(const STRING &obj,INT_W index=0){
 		INT_W res=0;
 		if(mdt->sz){
-			t::Index(index,mdt->sz);
+			z::Index(index,mdt->sz);
 			POINTER pse=mdt->str;
-			if(index>0)t::Shift(pse,index);
+			if(index>0)z::Shift(pse,index);
 			for(INT_W lmx=mdt->sz-obj.mdt->sz;index<=lmx;index++){
-				if(t::Compare(pse,obj.mdt->str,obj.mdt->sz)){res=index+1;break;}
-				t::Shift(pse);
+				if(z::Compare(pse,obj.mdt->str,obj.mdt->sz)){res=index+1;break;}
+				z::Shift(pse);
 			}
 		}
 		return res;
 	}
-	#ifdef _GLIBCXX_IOSTREAM
-	friend std::ostream& operator<< (std::ostream &out,const STRING &obj){
-		return obj.mdt->sz?out<<obj.mdt->str:out<<"NULL";
-	}
-	#endif
+	*/
 };
 ID_TYPE(15,STRING)
-#endif
 
-#ifdef TYPE_DATETIME
-/** ДатаВремя */
+/* * ДатаВремя * /
 class DATETIME {
 private:
 	time_t dtm;
@@ -505,12 +401,12 @@ public:
 	void Clock(){this->dtm=clock();}
 	void Now(){this->dtm=time(NULL);}
 	void Data(DateTime sdt){
-		DatetimeU udt;
+		DateTimeU udt;
 		udt.dtm=sdt;
 		this->dtm=mktime(&udt.stm);
 	}
 	DateTime Data(){
-		DatetimeU udt;
+		DateTimeU udt;
 		udt.stm=*localtime(&this->dtm);
 		return udt.dtm;
 	}
@@ -521,30 +417,8 @@ public:
 	}
 };
 ID_TYPE(14,DATETIME)
-#endif
 
-/** Пространство имёт от _types */
-namespace t{
-	/** Конвертация типа данных
-	 * @param val значение
-	 * @return значение с новым типом */
-	template <typename dTYPE,typename nTYPE>
-	nTYPE convert(dTYPE val){
-		return static_cast<nTYPE>(val);
-	}
-	/** Проверка на NULL
-	 * @param val переменная
-	 * @return `true` NULL, иначе `false` */
-	template <typename dTYPE>
-	LOGIC isNULL(dTYPE val){
-		LOGIC res=false;
-		if(::Type<dTYPE>::Name=="INT_T")if(!val)res=true;
-		return res;
-	}
-};
-
-#ifdef TYPE_LINK
-/* Ссылка */
+/ ** Ссылка * /
 class LINK {
 private:
 	STRING vtp;
@@ -586,7 +460,7 @@ public:
 	friend std::ostream& operator<<(std::ostream &out,const LINK &obj){
 		if(obj.pnt){
 			switch(obj.idt){
-				case 1:	out<<boolalpha<<*(LOGIC*)obj.pnt<<noboolalpha;break;
+				case 1:	out<<(*(LOGIC*)obj.pnt?"true":"false");break;
 				case 2:	out<<*(LETTER*)obj.pnt;break;
 				case 3:	out<<(INT_S)*(RANGE*)obj.pnt;break;
 				case 4:	out<<(INT_W)*(BYTE*)obj.pnt;break;
@@ -599,7 +473,7 @@ public:
 				case 11:out<<*(FLOAT*)obj.pnt;break;
 				case 12:out<<*(DOUBLE*)obj.pnt;break;
 				case 13:out<<*(POINTER*)obj.pnt;break;
-				//case 14:out<<*(DATETIME*)obj.pnt;break;
+				case 14:out<<*(DATETIME*)obj.pnt;break;
 				case 15:out<<*(STRING*)obj.pnt;break;
 				default:out<<obj.vtp;
 			}
@@ -609,10 +483,12 @@ public:
 	#endif
 };
 ID_TYPE(16,LINK)
-#endif
 
-#ifdef TYPE_ANY
-/** Любой тип */
+//ID_TYPE(17,резерв)
+//ID_TYPE(18,резерв)
+//ID_TYPE(19,резерв)
+
+/ ** Любой тип * /
 class ANY {
 private:
 	LINK lnk;
@@ -653,7 +529,7 @@ public:
 		if(lnk.Id()==::Type<dTYPE>::Id)lnk=val;
 		else{
 			Clear();
-			if(!t::isNULL(val)){
+			if(!z::isNULL(val)){
 				dTYPE *obj=new dTYPE(val);
 				lnk.Init(*obj);
 			}
@@ -836,21 +712,29 @@ public:
 	#endif
 }; 
 ID_TYPE(20,ANY)
-#endif
 
-namespace t {
-	/** Получение Id переменной
+/ ** Пространство имёт от _types * /
+namespace t{
+	/ ** Получение Id переменной
 	 * @param var переменная 
-	 * @return Id переменной */
+	 * @return Id переменной * /
 	template<typename dTYPE>
 	INT_W Id(dTYPE var){
 		return ::Type<dTYPE>::Id;
 	}
-	/** Получение типа переменной
+	/ ** Получение типа переменной
 	 * @param var переменная 
-	 * @return тип переменной */
+	 * @return тип переменной * /
 	template<typename dTYPE>
-	const LETTER* Type(dTYPE var){
-		return ::Type<dTYPE>::Name;
+	STRING Type(dTYPE var){
+		STRING vtp;
+		if(::Type<dTYPE>::Id)vtp=::Type<dTYPE>::Name;
+		else{vtp=typeid(var).name();
+			LETTER *lts=new LETTER[20];
+  		INT_M len=vtp.Size()-1;
+  		_itoa(len,lts,10);vtp-=lts;
+		}
+  	return vtp;
 	}
-};
+}
+*/

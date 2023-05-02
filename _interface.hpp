@@ -1,12 +1,12 @@
 /** Интерфэйс
  * Библиотека OWNI */
 
-#ifndef FILE_interface
+#pragma once
+#define FILE_interface
 
-#include <iostream>
 #include <clocale>
-#include <cstdlib>
-#include "_calc.h"
+#include <iostream>
+#include "_calc.hpp"
 
 /** Пространство имёт от _interface */
 namespace i {
@@ -19,8 +19,8 @@ namespace i {
 	void tab(INT_W tb=0,LETTER sl=' '){
 		INT_W szt=t+tb;
 		if(szt){
-			LETTER ltr[szt+1];POINTER pnt=ltr;
-			t::Fill(pnt,szt,(BYTE)sl);*(BYTE*)pnt=0;
+			LETTER ltr[szt+1];ADDRESS pnt=ltr;
+			z::Fill(pnt,szt,(BYTE)sl);*(BYTE*)pnt=0;
 			cout<<ltr;
 		}
 	}
@@ -80,7 +80,7 @@ namespace i {
 		cout<<endl;t::tab();
 		ANY obj(any);
 		cout<<"ANY("<<obj.Type()<<"){"<<obj<<'}';
-	}*/
+	}
 	void dump(POINTER pnt,INT_W size){
 		cout<<endl<<"#address\t0  1  2  3  4  5  6  7\t\t~~dump~~"<<endl;
 		i::tab(56,'-');cout<<endl<<hex;
@@ -96,7 +96,7 @@ namespace i {
 				cout<<"\t\t"<<txt<<endl;
 				txt="        ";col=0;
 			}
-			t::Shift(pnt);size--;
+			z::Shift(pnt);size--;
 		}
 		if(col){
 			if(col<6)cout<<'\t';
@@ -111,7 +111,7 @@ namespace i {
 		dump((POINTER)&var,sizeof(var));
 	}
 	void dump(LETTER *ltr){
-		INT_W sz=t::Lsize(ltr);
+		INT_W sz=z::Lsize(ltr);
 		cout<<endl<<"# "<<(sz>1?"CHARS":"LETTER");
 		dump((POINTER)ltr,sz);
 	}
@@ -123,7 +123,7 @@ namespace i {
 		if(msg)cout<<"\t"<<msg;
 		STRING obj(str);
 		dump((POINTER)*obj,obj.Total());
-	}
+	}*/
 	/** Пауза */
 	void p(){
 		cout<<endl;system("pause");
@@ -131,6 +131,3 @@ namespace i {
 	/** Включение кирилицы */
 	void r(){setlocale(LC_ALL,"");}
 }
-
-#define FILE_interface
-#endif

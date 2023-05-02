@@ -1,8 +1,11 @@
-// Вычисление\преобразование
+/** Вычисление\преобразование
+ * Библиотека OWNI */ 
 
-#ifndef FILE_calc
+#pragma once
+#define FILE_calc
 
-#include "_types.h"
+#include "_types.hpp"
+#include <stdio.h>
 
 namespace c {
 	
@@ -64,16 +67,19 @@ namespace c {
 		INT_B res=var*1000000;
 		return d10(res);
 	}
-	/** Получение шестнадтиричного значения байта
+	/*template<typename dTYPE>
+	STRING ToStr(dTYPE val){
+		POINTER<CHARS> lts;
+		sprintf(*lts,"%f",val);
+		return STRING(*lts);
+	}
+	 * Получение шестнадтиричного значения байта
 	 * @param b байт 
-	 * @return HEX значение	*/
+	 * @return HEX значение	* /
 	STRING Hex(BYTE b,LOGIC sg=false){
 		STRING st(16);
   	st="0123456789";st+=sg?"ABCDEF":"abcdef";
 		LETTER hx[3]={st[1+b/16],st[1+b%16],'\0'};
 		return STRING(hx);
-	}
+	}*/
 }
-
-#define FILE_calc
-#endif

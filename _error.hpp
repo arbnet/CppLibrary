@@ -1,9 +1,10 @@
-// Обработка ошибок
+/** Обработка ошибок
+ * Библиотека OWNI */ 
 
-#ifndef FILE_error
+#pragma once
+#define FILE_error
 
 #include <iostream>
-using namespace std;
 
 /** Класс ошибки */
 class Error {
@@ -19,7 +20,7 @@ public:
 	Error(const char* msg,bool exi=false):msg(msg),exi(exi){}
 	/** Вывод информации о ошибке */
 	void info(){
-		cout<<endl<<file<<' '<<func<<':'<<line<<' '<<msg;
+		std::cout<<std::endl<<file<<' '<<func<<':'<<line<<' '<<msg;
 		if(!exi)exit(1);
 	}
 };
@@ -32,7 +33,7 @@ namespace e{
 	 * @param tpe тип исключения
 	 * @param msg сообщение */
 	void Excep(const char* tpe,const char* msg){
-		cout<<endl<<Error::file<<' '<<Error::func<<':'<<Error::line<<' '<<tpe<<' '<<msg;
+		std::cout<<std::endl<<Error::file<<' '<<Error::func<<':'<<Error::line<<' '<<tpe<<' '<<msg;
 	}
 }
 
@@ -40,6 +41,3 @@ namespace e{
 #define TRY try{
 #define CATCH }catch(Error err){err.info();}\
 catch(const exception &exc){e::Excep(typeid(exc).name(),exc.what());}
-
-#define FILE_error
-#endif

@@ -16,24 +16,24 @@
 |F|-|\_flows|Потоки||
 |G|-|\_grafica|||
 |H|-|\_|||
-|I|-|\_interface|Интерфейс|iostream, \_types.hpp|
+|I|-|\_interface|Интерфейс|clocale, cstdlib, iostream, \_types.hpp, \_calc.hpp|
 |J|-|\_|||
 |K|-|\_|||
 |L|-|\_libdll|Работа с DLL||
 |M|-|\_media|Аудио, Видео||
 |N|-|\_net|Работа с сетью||
-|O|-|\_owni|Конфигурация библиотеки|Все файлы библиотеки OWNI|
+|O|-|\_|||
 |P|-|\_|||
 |Q|-|\_|||
 |R|-|\_|||
 |S|-|\_|||
-|T|+|\_types|[Типы данных](https://github.com/arbnet/CppLibrary/wiki/Типы-данных "посмотреть описание типов данных")||
+|T|+|\_types|[Типы данных](https://github.com/arbnet/CppLibrary/wiki/Типы-данных "посмотреть описание типов данных")|cstdlib, typeinfo, сtime, \_zests.hpp|
 |U|-|\_|||
 |V|-|\_|||
 |W|-|\_winapi|Window API||
 |X|-|\_|||
 |Y|-|\_|||
-|Z|+|\_zests.h|Изюменки для отладки|clocale, cstdlib, \_types.hpp, \_interface.hpp, \_calc.hpp|
+|Z|+|\_zests.h|Изюминки, вспомогательные функции|подключается из \_types.hpp|
 
 Обозначения в колонке '?' `-` не реализовано `+` реализовано
 

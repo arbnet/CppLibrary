@@ -1,11 +1,10 @@
 /** Базовые классы
  * Библиотека OWNI */
 
-#ifndef FILE_types
-#include "_types.hpp"
-#endif
 #pragma once
 #define FILE_base
+
+#include "_types.hpp"
 
 /** АвтоУказатель */
 template<typename dTYPE>
@@ -16,6 +15,7 @@ public:
   ~AutoPOINTER(){if(sgn)this->Clear();}
   AutoPOINTER(AutoPOINTER &obj){sgn=false;}
   AutoPOINTER(){AutoPOINTER::pnt=new (dTYPE);}
+  AutoPOINTER(dTYPE val){AutoPOINTER::pnt=new (dTYPE)(val);}
   AutoPOINTER(dTYPE val){AutoPOINTER::pnt=new (dTYPE)(val);}
   dTYPE& operator *(){return *(dTYPE*)pnt;}
   explicit operator bool(){return AutoPOINTER::pnt?true:false;}
