@@ -6,6 +6,7 @@
 
 #include <typeinfo>
 #include <cstdlib>
+#include <stdio.h>
 #include <ctime>
 
 /** Пустые макросы _error */
@@ -159,6 +160,7 @@ class POINTER {
 		pnt=NULL;
 	}
 public:
+	/** защита от уничтожения */
 	LOGIC guard=false;
 	POINTER(){pnt=new dTYPE;}
   POINTER(dTYPE val){pnt=new dTYPE(val);}
@@ -172,6 +174,7 @@ public:
 		if(pnt)*(dTYPE*)pnt=val;
 		return *this;
 	}
+	/** Уничтожение указателя */
 	void Kill(){
 		if(obj)obj->Kill(guard);else delete pnt;
 		if(!guard)pnt=NULL;
@@ -210,14 +213,14 @@ protected:
 		*(BYTE*)adr=0;
 	}
 public:
+	/** защита от уничтожения */
 	LOGIC guard=false;
 	POINTER<CHARS>(INT_W tl=32,INT_W rv=0):tl(tl),rv(!tl && !rv?32:rv){
 		pnt=new LETTER[tl+1];*(BYTE*)pnt=0;
 	}
 	POINTER<CHARS>(const LETTER *lts){
 		sz=tl=z::Lsize(lts);rv=0;
-		pnt=new LETTER[tl+1];
-		Assign(lts);
+		pnt=new LETTER[tl+1];Assign(lts);
 	}
 	POINTER<CHARS>(POINTER<CHARS> &obj):
 		pnt(obj.pnt),sz(obj.sz),tl(obj.tl),obj(&obj){
@@ -225,7 +228,7 @@ public:
 	}
 	~POINTER<CHARS>(){if(!obj)if(pnt)delete pnt;}
 	explicit operator bool(){return pnt?true:false;}
-  LETTER* operator*(){return (LETTER*)pnt;}
+  LETTER* operator*(){return pnt;}
 	POINTER<CHARS>& operator=(const LETTER *lts){
 		if(pnt){
 			sz=z::Lsize(lts);
@@ -236,21 +239,28 @@ public:
 		}
 		return *this;
 	}
+	/** Уничтожение указателя */
   void Kill(){
 		if(pnt){
 			if(obj)obj->Kill(guard);else delete pnt;
 			if(!guard){pnt=NULL;sz=tl=rv=0;}
 		}
 	}
+	/** Получение\подсчёт размера массива символов
+	 * @param sgn `true` для подсчёта
+	 * @return количество символов */
 	INT_W Size(LOGIC sgn=false){
 		if(sgn)sz=z::Lsize(pnt);
 		return sz;
 	}
+	/** Тотальный размер в памяти */
 	INT_W Total(){return tl;}
+	/** Размер резервирования */
 	INT_W Reserve(){return rv;}
+	/** Установка размера резервирования */
 	void Reserve(INT_W rv){this->rv=rv;}
 	#ifdef _GLIBCXX_IOSTREAM
-	friend std::ostream& operator<< (std::ostream &out,const POINTER<CHARS> &obj){
+	friend std::ostream& operator<< (std::ostream &out,POINTER<CHARS> &obj){
 		return obj.sz?out<<(LETTER*)obj.pnt:out<<"NULL";
 	}
 	#endif
@@ -260,23 +270,21 @@ public:
 
 /** Строка */
 class STRING :public POINTER<CHARS> {
-	/*
-	LOGIC Compare(ADDRESS pnt,INT_W sz){
-		return sz==sz?z::Compare(str,pnt,sz):false;
-	}*/
+	LOGIC Compare(ADDRESS adr,INT_W sz){
+		return sz==sz?z::Compare(pnt,adr,sz):false;
+	}
 public:
-	//STRING(const STRING &obj): mdt(obj.mdt),dbl(true){
-	//	cout<<"Cr1"<<endl;
-	//}
-	STRING(INT_W tl=0,INT_W rv=0):POINTER<CHARS>(tl,rv){}
 	STRING(const LETTER *lts):POINTER<CHARS>(lts){}
+	STRING(const STRING &obj):POINTER<CHARS>(obj.pnt){}
+	STRING(INT_W tl=0,INT_W rv=0):POINTER<CHARS>(tl,rv){}
 	explicit operator bool(){return sz?true:false;}
-	template<typename dTYPE, typename = t::Enable<t::isInteger<dTYPE>,dTYPE>>
+	template<typename dTYPE, typename = t::Enable<t::isBase<dTYPE>,dTYPE>>
 	STRING(dTYPE val){
 		POINTER<CHARS> lts;
-		sprintf(*lts,"%d",val);lts.Size(true);
-		cout<<"VVV="<<*lts<<' '<<lts.Size()<<' '<<lts.Total()<<endl;
-		//POINTER<CHARS>::operator=(lts);
+		INT_W vid=::Type<dTYPE>::Id;
+		if(vid==1)lts=val?"true":"false";
+		else{sprintf(*lts,vid==11 || vid==12?"%f":"%d",val);lts.Size(true);}
+		*this=*lts;
 	}
 	LETTER& operator[](INT_L idx){
 		z::Index(idx,sz);
@@ -286,109 +294,120 @@ public:
 		POINTER<CHARS>::operator=(lts);
 		return *this;
 	}
-	/*
-	
-	STRING& operator=(const LETTER *ltr){
-		this->Assign((ADDRESS)ltr,z::Lsize(ltr));
-		return *this;
-	}
 	STRING& operator=(const STRING &obj){
-		this->Assign(obj.str,obj.sz);
+		sz=obj.sz;
+		if(LETTER* npt=Change()){
+			delete []pnt;pnt=npt;
+		}else	if(sz>tl)sz=tl;
+		Assign(obj.pnt);
 		return *this;
 	}
-	
 	STRING& operator+=(const STRING &obj){
-		this->Put(obj);
-		return *this;
+		Put(obj);return *this;
 	}
 	STRING& operator-=(const STRING &obj){
-		this->Cut(obj);
-		return *this;
+		this->Cut(obj);return *this;
 	}
 	LOGIC operator==(const STRING &obj){
-		return this->Compare(obj.str,obj.sz);
+		return Compare(obj.pnt,obj.sz);
 	}
 	LOGIC operator!=(const STRING &obj){
-		return !this->Compare(obj.str,obj.sz);
+		return !Compare(obj.pnt,obj.sz);
 	}
-	*/
-	/*void Put(const STRING &obj,INT_W index=0){
-		if(INT_W sz=obj.mdt->sz){
-			if(INT_L(mdt->sz+sz)>(mdt->mr?65535:mdt->tl))
-				sz=(mdt->mr?65535:mdt->tl)-mdt->sz;
-			if(sz){
-				POINTER pnt1,pnt2,pntt;
-				if(!index)index=mdt->sz;
-				else z::Index(index,mdt->sz);
-				if(LETTER* str=this->Change(mdt->sz+sz)){
-					pnt1=(POINTER)str;pnt2=(POINTER)mdt->str;
-					if(index)z::Copy(pnt1,pnt2,index);
-					pntt=pnt2;pnt2=(POINTER)obj.mdt->str;
-					z::Copy(pnt1,pnt2,sz);pnt2=pntt;
-					z::Copy(pnt1,pnt2,mdt->sz-index);
-					*(BYTE*)pnt1=0;
-					delete []mdt->str;mdt->str=str;
+	/** Вставка подстроки
+	 * @param obj подстрока
+	 * @param idx индекс куда вставить */
+	void Put(const STRING &obj,INT_W idx=0){
+		if(INT_W psz=obj.sz){
+			if(INT_L(sz+psz)>(rv?65535:tl))psz=(rv?65535:tl)-sz;
+			if(psz){
+				ADDRESS adr1,adr2,adr3;
+				INT_W osz=sz;sz+=psz;
+				if(!idx)idx=osz;else z::Index(idx,sz);
+				if(LETTER* lts=Change()){
+					adr1=(ADDRESS)lts;adr2=(ADDRESS)pnt;
+					if(idx)z::Copy(adr1,adr2,idx);
+					adr3=(ADDRESS)obj.pnt;
+					z::Copy(adr1,adr3,psz);
+					z::Copy(adr1,adr2,osz-idx);
+					*(BYTE*)adr1=0;
+					delete []pnt;pnt=lts;
 				}else{
-					pnt1=(POINTER)mdt->str;z::Shift(pnt1,mdt->sz);
-					pnt2=pnt1;z::Shift(pnt1,sz);*(BYTE*)pnt1=0;
-					z::Copy(pnt1,pnt2,-(mdt->sz-index));
-					pnt1=pnt2;pnt2=(POINTER)obj.mdt->str;
-					z::Copy(pnt1,pnt2,sz);
+					adr1=adr2=(ADDRESS)pnt;
+					z::Shift(adr1,sz);z::Shift(adr2,osz);
+					*(BYTE*)adr1=0;z::Copy(adr1,adr2,-(osz-idx));
+					adr3=(ADDRESS)obj.pnt;z::Shift(adr3,psz);
+					z::Copy(adr1,adr3,-psz);
 				}
-				mdt->sz+=sz;
 			}
 		}
 	}
-	void Cut(INT_W index,INT_W size){
-		if(size && mdt->sz){
-			z::Index(index,mdt->sz);
-			if(index+size>mdt->sz)size=mdt->sz-index;
-			POINTER pnt1,pnt2;
-			if(LETTER* str=this->Change(mdt->sz-size)){
-				pnt1=(POINTER)str;pnt2=(POINTER)mdt->str;
-				if(index)z::Copy(pnt1,pnt2,index);
-				z::Shift(pnt2,size);index+=size;
-				z::Copy(pnt1,pnt2,mdt->sz-index);
-				delete []mdt->str;mdt->str=str;
-			}else{
-				pnt1=(POINTER)mdt->str;
-				if(index)z::Shift(pnt1,index);
-				pnt2=pnt1;z::Shift(pnt2,size);
-				index+=size;z::Copy(pnt1,pnt2,mdt->sz-index);
+	/** Вырезать
+	 * @param idx индекс места вырезки
+	 * @param csz размер для вырезки */
+	void Cut(INT_W idx,INT_W csz){
+		if(sz){z::Index(idx,sz);
+			if(idx+csz>sz)csz=sz-idx;
+			if(csz){
+				ADDRESS adr1,adr2;
+				INT_W osz=sz;sz=sz-csz;
+				if(LETTER* lts=Change()){
+					delete []pnt;pnt=lts;
+					adr1=(ADDRESS)lts;adr2=(ADDRESS)pnt;
+					if(idx)z::Copy(adr1,adr2,idx);
+					z::Shift(adr2,csz);idx+=csz;
+					z::Copy(adr1,adr2,osz-idx);
+				}else{
+					adr1=(ADDRESS)pnt;
+					if(idx)z::Shift(adr1,idx);
+					adr2=adr1;z::Shift(adr2,csz);
+					idx+=csz;z::Copy(adr1,adr2,osz-idx);
+				}
+				*(BYTE*)adr1=0;
 			}
-			*(BYTE*)pnt1=0;mdt->sz-=size;
 		}
 	}
-	void Cut(const STRING &obj,INT_W index=0){
-		index=this->Find(obj,index);
-		if(index)this->Cut(index,obj.mdt->sz);
+	/** Вырезать
+	 * @param obj подстрока
+	 * @param idx индекс поиска */
+	void Cut(const STRING &obj,INT_W idx=0){
+		idx=this->Find(obj,idx);
+		if(idx)Cut(idx,obj.sz);
 	}
-	INT_W Find(const STRING &obj,INT_W index=0){
+	/** Поиск позиции подстроки
+	 * @param obj подстрока
+	 * @param idx индекс начала поиска
+	 * @return индекс позиции */
+	INT_W Find(const STRING &obj,INT_W idx=0){
 		INT_W res=0;
-		if(mdt->sz){
-			z::Index(index,mdt->sz);
-			POINTER pse=mdt->str;
-			if(index>0)z::Shift(pse,index);
-			for(INT_W lmx=mdt->sz-obj.mdt->sz;index<=lmx;index++){
-				if(z::Compare(pse,obj.mdt->str,obj.mdt->sz)){res=index+1;break;}
-				z::Shift(pse);
+		if(sz){
+			LOGIC sgn=idx>sz?false:true;
+			ADDRESS adr=pnt;
+			z::Index(idx,sz);if(idx>0)z::Shift(adr,idx);
+			if(sgn){
+				for(INT_W nx=sz-obj.sz;idx<=nx;idx++){
+					if(z::Compare(adr,obj.pnt,obj.sz)){res=idx+1;break;}
+					z::Shift(adr);
+				}
+			}else if(idx-obj.sz>0){
+				for(INT_W nx=idx-obj.sz;idx>0;idx--){
+					if(z::Compare(adr,obj.pnt,obj.sz)){res=idx+1;break;}
+					z::Shift(adr,-1);
+				}
 			}
 		}
 		return res;
 	}
-	*/
 };
 ID_TYPE(15,STRING)
 
-/* * ДатаВремя * /
+/** ДатаВремя */
 class DATETIME {
-private:
 	time_t dtm;
 public:
 	DATETIME(time_t dtm=0){this->dtm=dtm;}
-	DATETIME(const DATETIME &obj): dtm(obj.dtm){}
-	INT_B operator *(){return (INT_B)this->dtm;}
-	operator time_t(){return this->dtm;}
+	DATETIME(const DATETIME &obj):dtm(obj.dtm){}
+	operator INT_B(){return (INT_B)this->dtm;}
 	DATETIME& operator=(time_t val){
 		this->dtm=val;return *this;
 	}
@@ -398,38 +417,50 @@ public:
 	DATETIME& operator-=(time_t val){
 		this->dtm-=val;return *this;
 	}
+	/** Время выполнения */
 	void Clock(){this->dtm=clock();}
+	/** Текущее время */
 	void Now(){this->dtm=time(NULL);}
+	/** Установка из структуры даты-времени
+	 * @param std структура даты-времени */
 	void Data(DateTime sdt){
 		DateTimeU udt;
 		udt.dtm=sdt;
+		udt.dtm.month-=1;
+		udt.dtm.year-=1900;
 		this->dtm=mktime(&udt.stm);
 	}
+	/** Получение структуры даты-времени */
 	DateTime Data(){
 		DateTimeU udt;
 		udt.stm=*localtime(&this->dtm);
+		udt.dtm.year+=1900;
+		udt.dtm.month+=1;
 		return udt.dtm;
 	}
-	STRING Format(STRING fmt="%Y.%m.%d %H:%M:%S",BYTE sz=64){
-		LETTER res[sz];
-		strftime(res,sz,*fmt,localtime(&this->dtm));
+	/** Получение строкового представления даты-времени
+	 * @param fmt формат даты-времени
+	 * @param bsz размер буфера формирования строки
+	 * @return строка с датой-временем */
+	STRING Format(STRING fmt="%Y.%m.%d %H:%M:%S",BYTE bsz=64){
+		LETTER res[bsz];
+		strftime(res,bsz,*fmt,localtime(&this->dtm));
 		return STRING(res);
 	}
 };
-ID_TYPE(14,DATETIME)
+ID_TYPE(16,DATETIME)
 
-/ ** Ссылка * /
+/** Ссылка */
 class LINK {
-private:
 	STRING vtp;
-	POINTER pnt=NULL;
+	ADDRESS pnt=NULL;
 	INT_W vsz=0,idt=0;
 public:
 	LINK(){}
 	template<typename dTYPE>
 	LINK(dTYPE &obj){this->Init(obj);}
 	LINK(const LINK &obj):idt(obj.idt),vsz(obj.vsz),vtp(obj.vtp),pnt(obj.pnt){}
-	POINTER operator *(){return pnt;}
+	ADDRESS operator*(){return pnt;}
 	template <typename dTYPE>
 	operator dTYPE(){return *(dTYPE*)pnt;}
 	explicit operator bool(){return pnt?true:false;}
@@ -443,9 +474,14 @@ public:
 		CATCH
 		return *this;
 	}
+	/** Получение Id данных */
 	INT_W Id(){return this->idt;}
+	/** Размер данных */
 	INT_W Size(){return this->vsz;}
+	/** Тип данных */
 	STRING Type(){return this->vtp;}
+	/** Инициализация
+	 * @param obj объект */
 	template<typename dTYPE>
 	void Init(dTYPE &obj){
 		pnt=&obj;
@@ -453,6 +489,7 @@ public:
 		idt=::Type<dTYPE>::Id;
 		vtp=::Type<dTYPE>::Name;
 	}
+	/** Очистка ссылки */
 	void Clear(){
 		pnt=NULL;vsz=idt=0;vtp="";
 	}
@@ -472,23 +509,22 @@ public:
 				case 10:out<<*(INT_B*)obj.pnt;break;
 				case 11:out<<*(FLOAT*)obj.pnt;break;
 				case 12:out<<*(DOUBLE*)obj.pnt;break;
-				case 13:out<<*(POINTER*)obj.pnt;break;
-				case 14:out<<*(DATETIME*)obj.pnt;break;
+				case 13:out<<*(ADDRESS*)obj.pnt;break;
+				case 14:out<<*(CHARS*)obj.pnt;break;
 				case 15:out<<*(STRING*)obj.pnt;break;
-				default:out<<obj.vtp;
+				//default:out<<obj.vtp;
 			}
 		}else out<<"NULL";
 		return out;
 	}
 	#endif
 };
-ID_TYPE(16,LINK)
+ID_TYPE(17,LINK)
 
-//ID_TYPE(17,резерв)
 //ID_TYPE(18,резерв)
 //ID_TYPE(19,резерв)
 
-/ ** Любой тип * /
+/** Любой тип */
 class ANY {
 private:
 	LINK lnk;
@@ -507,9 +543,10 @@ private:
 				case 10:delete static_cast<INT_B*>(*lnk);break;
 				case 11:delete static_cast<FLOAT*>(*lnk);break;
 				case 12:delete static_cast<DOUBLE*>(*lnk);break;
-				case 13:delete static_cast<POINTER*>(*lnk);break;
-				case 14:delete static_cast<DATETIME*>(*lnk);break;
+				case 13:delete static_cast<ADDRESS*>(*lnk);break;
+				case 14:delete static_cast<CHARS*>(*lnk);break;
 				case 15:delete static_cast<STRING*>(*lnk);break;
+				case 16:delete static_cast<DATETIME*>(*lnk);break;
 				default:delete static_cast<LINK*>(*lnk);
 			}
 			lnk.Clear();
@@ -517,14 +554,14 @@ private:
 	}
 public:
 	ANY(){}
-	template <typename dTYPE>
+	template<typename dTYPE>
 	ANY(dTYPE val){*this=val;}
-	ANY(const ANY &obj): lnk(obj.lnk){}
+	ANY(const ANY &obj):lnk(obj.lnk){}
 	~ANY(){Clear();}
 	explicit operator bool(){return (LOGIC)lnk;}
-	template <typename dTYPE>
+	template<typename dTYPE>
 	explicit operator dTYPE(){return (dTYPE)lnk;}
-	template <typename dTYPE>
+	template<typename dTYPE>
 	ANY& operator=(dTYPE val){
 		if(lnk.Id()==::Type<dTYPE>::Id)lnk=val;
 		else{
@@ -582,7 +619,7 @@ public:
 		}
 		return *this;
 	}
-	template <typename dTYPE>
+	template<typename dTYPE>
 	ANY& operator+(dTYPE val){
 		TRY
 		if(lnk.Id()==::Type<dTYPE>::Id)lnk=(dTYPE)lnk+val;
@@ -592,7 +629,7 @@ public:
 		CATCH
 		return *this;
 	}
-	template <typename dTYPE>
+	template<typename dTYPE>
 	ANY& operator-(dTYPE val){
 		TRY
 		if(lnk.Id()==::Type<dTYPE>::Id)lnk=(dTYPE)lnk-val;
@@ -602,7 +639,7 @@ public:
 		CATCH
 		return *this;
 	}
-	template <typename dTYPE>
+	template<typename dTYPE>
 	ANY& operator*(dTYPE val){
 		TRY
 		if(lnk.Id()==::Type<dTYPE>::Id)lnk=(dTYPE)lnk*val;
@@ -612,7 +649,7 @@ public:
 		CATCH
 		return *this;
 	}
-	template <typename dTYPE>
+	template<typename dTYPE>
 	ANY& operator/(dTYPE val){
 		TRY
 		if(lnk.Id()==::Type<dTYPE>::Id)lnk=(dTYPE)lnk/val;
@@ -622,7 +659,7 @@ public:
 		CATCH
 		return *this;
 	}
-	template <typename dTYPE>
+	template<typename dTYPE>
 	ANY& operator+=(dTYPE val){
 		TRY
 		if(lnk.Id()==::Type<dTYPE>::Id)lnk=(dTYPE)lnk+val;
@@ -632,7 +669,7 @@ public:
 		CATCH
 		return *this;
 	}
-	template <typename dTYPE>
+	template<typename dTYPE>
 	ANY& operator-=(dTYPE val){
 		TRY
 		if(lnk.Id()==::Type<dTYPE>::Id)lnk=(dTYPE)lnk-val;
@@ -642,7 +679,7 @@ public:
 		CATCH
 		return *this;
 	}
-	template <typename dTYPE>
+	template<typename dTYPE>
 	ANY& operator*=(dTYPE val){
 		TRY
 		if(lnk.Id()==::Type<dTYPE>::Id)lnk=(dTYPE)lnk*val;
@@ -652,7 +689,7 @@ public:
 		CATCH
 		return *this;
 	}
-	template <typename dTYPE>
+	template<typename dTYPE>
 	ANY& operator/=(dTYPE val){
 		TRY
 		if(lnk.Id()==::Type<dTYPE>::Id)lnk=(dTYPE)lnk/val;
@@ -662,7 +699,7 @@ public:
 		CATCH
 		return *this;
 	}
-	template <typename dTYPE>
+	template<typename dTYPE>
 	ANY& operator%=(dTYPE val){
 		TRY
 		if(lnk.Id()==::Type<dTYPE>::Id)lnk=(dTYPE)lnk%val;
@@ -672,7 +709,7 @@ public:
 		CATCH
 		return *this;
 	}
-	template <typename dTYPE>
+	template<typename dTYPE>
 	ANY& operator&=(dTYPE val){
 		TRY
 		if(lnk.Id()==::Type<dTYPE>::Id)lnk=(dTYPE)lnk&val;
@@ -682,7 +719,7 @@ public:
 		CATCH
 		return *this;
 	}
-	template <typename dTYPE>
+	template<typename dTYPE>
 	ANY& operator|=(dTYPE val){
 		TRY
 		if(lnk.Id()==::Type<dTYPE>::Id)lnk=(dTYPE)lnk|val;
@@ -692,7 +729,7 @@ public:
 		CATCH
 		return *this;
 	}
-	template <typename dTYPE>
+	template<typename dTYPE>
 	ANY& operator^=(dTYPE val){
 		TRY
 		if(lnk.Id()==::Type<dTYPE>::Id)lnk=(dTYPE)lnk^val;
@@ -713,18 +750,18 @@ public:
 }; 
 ID_TYPE(20,ANY)
 
-/ ** Пространство имёт от _types * /
-namespace t{
-	/ ** Получение Id переменной
+/** Пространство имёт от _types */
+namespace t {
+	/** Получение Id переменной
 	 * @param var переменная 
-	 * @return Id переменной * /
+	 * @return Id переменной */
 	template<typename dTYPE>
 	INT_W Id(dTYPE var){
 		return ::Type<dTYPE>::Id;
 	}
-	/ ** Получение типа переменной
+	/** Получение типа переменной
 	 * @param var переменная 
-	 * @return тип переменной * /
+	 * @return тип переменной */
 	template<typename dTYPE>
 	STRING Type(dTYPE var){
 		STRING vtp;
@@ -737,4 +774,3 @@ namespace t{
   	return vtp;
 	}
 }
-*/

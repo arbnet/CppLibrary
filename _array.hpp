@@ -12,130 +12,161 @@ struct KeyValue {
 	ANY value;
 };
 
+/** Итератор */
+class Iterator {
+protected:
+	INT_L sz=0;// размер
+	INT_L idx=0;// индекс
+	LOGIC how=false;// признак перебора
+public:
+  /** Получение признака перебора */
+  LOGIC How(){return how;}
+	/** Указание как перебирать
+	 * @param how `true` с конца, `false` с начала */
+	void How(LOGIC how){Index(how?-1:0);this->how=how;}
+  /** Размер */
+  INT_L Size(){return sz;}
+  /** Текущий индекс */
+	INT_L Index(){return sz?idx+1:0;}
+  /** Установка индекса
+   * @param idx новый интдекс */
+	void Index(INT_L idx){z::Index(idx,sz);this->idx=idx;}
+  /** Сброс */
+	void Reset(){Index(this->how?-1:0);}
+  /** Проверка на последний элемент */
+	LOGIC Last(){
+		LOGIC res=false;
+		if(this->how){
+			if(idx==0)res=true;
+		}else{
+			if(idx==sz-1)res=true;
+		}
+		return res;
+	}
+  /** Переход к следующему элементу */
+	LOGIC Next(){
+		LOGIC res=false;
+		if(this->how){
+			if(idx>0){idx--;res=true;}
+		}else{
+			if(idx<sz-1){idx++;res=true;}
+		}
+		return res;
+	}
+};
+
 /** Массив */
 template <typename dTYPE>
-class Array {
-struct Data {
+class Array :public Iterator {
 	INT_W rv=0;
-	INT_L sz=0,tl=0;
+	INT_L tl=0;
 	dTYPE *vars=NULL;
-};
-	Data *mdt;
-	INT_L ix=0;
-	LOGIC dbl=false;
-	LOGIC how=false;
-	void Init(INT_L tl=0,INT_W rv=10){
-		if(this->dbl){mdt=new Data;dbl=false;}
-		else if(mdt->vars)delete []mdt->vars;
-		if(tl)mdt->vars=new dTYPE[tl];
-		mdt->rv=rv;mdt->tl=tl;mdt->sz=this->ix=0;
+	void Init(INT_L tl,INT_W rv){
+		if(vars)delete []vars;
+		if(tl){
+			if(rv)tl=z::Volume(tl,rv);
+			vars=new dTYPE[tl];
+		}else vars=NULL;
+		this->tl=tl;this->rv=rv;idx=sz=0;how=false;
 	}
 public:
-	Array(const Array &obj): mdt(obj.mdt),dbl(true){}
-	Array(INT_L tl=0,INT_W rv=10){mdt=new Data;this->Init(tl,rv);}
-	~Array(){if(!this->dbl){delete []mdt->vars;delete mdt;}}
-	void Clear(){this->Init(mdt->tl,mdt->rv);}
-	operator bool(){return mdt->sz?true:false;}
-	dTYPE& operator[](INT_L index){
-		if(index==0)index=this->ix;
-		else z::Index(index,mdt->sz);
-		return mdt->vars[index];
+	Array(INT_L tl=0,INT_W rv=10){this->Init(tl,rv);}
+	Array(const Array &obj){
+		this->Init(obj.sz,0);sz=obj.sz;
+		if(sz){
+			ADDRESS adr1=vars,adr2=obj.vars;
+			z::Copy(adr1,adr2,sz*sizeof(dTYPE));
+		}
 	}
-	Array<dTYPE>& operator=(const Array<dTYPE> &oar){
-		if(this!=&oar){this->Init(oar.mdt->tl,oar.mdt->rv);
-			mdt->sz=oar.mdt->sz;
-			if(mdt->sz){
-				Array<dTYPE> obj(oar);
-				for(INT_L nx=0;nx++<mdt->sz;)
-					(*this)[nx]=obj[nx];
+	~Array(){if(vars)delete []vars;}
+	operator bool(){return sz?true:false;}
+	dTYPE& operator[](INT_L idx){
+		if(idx==0)idx=this->idx;
+		else z::Index(idx,sz);
+		return vars[idx];
+	}
+	Array<dTYPE>& operator=(Array<dTYPE> &oar){
+		if(this!=&oar){
+			if(tl<oar.sz)this->Init(oar.tl,rv);
+			if(oar.sz){sz=oar.sz;
+				ADDRESS adr1=vars,adr2=oar.vars;
+				z::Copy(adr1,adr2,sz*sizeof(dTYPE));
 			}
 		}
 		return *this;
 	}
-	INT_L Size(){return mdt->sz;}
-	INT_L Total(){return mdt->tl;}
-	INT_L Index(){return mdt->sz?this->ix+1:0;}
-	INT_L Reserve(){return mdt->rv;}
-	void Reserve(INT_W rv){mdt->rv=rv;}
-	void How(LOGIC how){
-		Index(how?-1:0);this->how=how;
-	}
-	void Index(INT_L index){
-		z::Index(index,mdt->sz);this->ix=index;
-	}
-	void Reset(){
-		Index(this->how?-1:0);
-	}
-	LOGIC Last(){
-		LOGIC res=false;
-		if(this->how){
-			if(this->ix==0)res=true;
-		}else{
-			if(this->ix==mdt->sz-1)res=true;
-		}
-		return res;
-	}
-	LOGIC Next(){
-		LOGIC res=false;
-		if(this->how){
-			if(this->ix>0){this->ix--;res=true;}
-		}else{
-			if(this->ix<mdt->sz-1){this->ix++;res=true;}
-		}
-		return res;
-	}
+	/** Очистка массива */
+	void Clear(){this->Init(0,0);}
+	/** Тотальный размер в памяти */
+	INT_L Total(){return tl;}
+	/** Размер резервирования */
+	INT_L Reserve(){return rv;}
+	/** Установка размера резервирования
+	 * @param rv размер резервирования */
+	void Reserve(INT_W rv){this->rv=rv;}
+	/** Добавление новых элементов массива
+	 * @param ...args новые элементы */
 	template<typename... aARG>
-	void Add(aARG... args){
+	void Add(aARG ...args){
 		(this->Put(args), ...);
 	}
-	void Put(dTYPE val,INT_L index=0){
-		INT_L ntx=mdt->rv?4294967295:mdt->tl;
-		if(mdt->sz!=ntx){
-			if(index==0)index=mdt->sz;
-			else z::Index(index,mdt->sz);
-			mdt->sz++;
-			if(mdt->rv){
-				ntx=z::Volume(mdt->sz,mdt->rv);
-				if(mdt->tl!=ntx){
-					dTYPE *vars=new dTYPE[ntx] ;
-					if(mdt->tl){INT_L nx=0;
-						for(;nx<index;nx++)vars[nx]=mdt->vars[nx];
-						for(;nx<mdt->sz;nx++)vars[nx+1]=mdt->vars[nx];
-						delete []mdt->vars;
+	/** Положить новый элемент
+	 * @param val значение
+	 * @param idx индекс */
+	void Put(dTYPE val,INT_L idx=0){
+		if(sz<4294967295){
+			INT_L nsz=sz+1;
+			INT_L ntl=rv?z::Volume(nsz,rv):tl;
+			if(nsz<ntl){
+				if(idx)z::Index(idx,sz);else idx=sz;
+				if(tl!=ntl){tl=ntl;
+					dTYPE *nvrs=new dTYPE[tl];
+					if(vars){
+						INT_S ln=sizeof(dTYPE);
+						ADDRESS adr1=nvrs,adr2=vars;
+						z::Copy(adr1,adr2,idx*ln);
+						if(idx<sz){z::Shift(adr1,ln);
+							z::Copy(adr1,adr2,(nsz-idx)*ln);
+						}
+						delete []vars;
 					}
-					mdt->tl=ntx;mdt->vars=vars;
-				}else if(index<mdt->sz){ntx=mdt->sz;
-					while(index<ntx){
-						mdt->vars[ntx]=mdt->vars[ntx-1];ntx--;
-					}
+					vars=nvrs;
+				}else	if(idx<sz){
+					INT_S ln=sizeof(dTYPE);
+					ADDRESS adr1,adr2=vars;
+					z::Shift(adr2,sz*ln);adr1=adr2;
+					z::Shift(adr2,-ln);
+					z::Copy(adr1,adr2,-(sz-idx)*ln);
 				}
-			}else if(index<mdt->sz){ntx=mdt->sz;
-				while(index<ntx){
-					mdt->vars[ntx]=mdt->vars[ntx-1];ntx--;
-				}
+				vars[idx]=val;sz++;
 			}
-			mdt->vars[index]=val;
 		}
 	}
-	dTYPE Take(INT_L index=-1){
+	/** Взять элемент
+	 * @param idx индекс */
+	dTYPE Take(INT_L idx=-1){
 		dTYPE val;
-		if(mdt->sz){
-			z::Index(index,mdt->sz);
-			val=mdt->vars[index];mdt->sz--;
-			while(index<mdt->sz){
-				mdt->vars[index]=mdt->vars[index+1];index++;
+		if(sz){
+			z::Index(idx,sz);val=vars[idx];
+			if(idx<sz){
+				INT_S ln=sizeof(dTYPE);
+				ADDRESS adr1,adr2=vars;
+				z::Shift(adr2,idx*ln);adr1=adr2;
+				z::Shift(adr2,ln);
+				z::Copy(adr1,adr2,(sz-idx)*ln);
 			}
+			sz--;
 		}else val=0;
 		return val;
 	}
 	#ifdef _GLIBCXX_IOSTREAM
-	friend std::ostream& operator<< (std::ostream &out,const Array<dTYPE> &oar){
-		Array<dTYPE> obj(oar);INT_L sz=obj.Size();
+	friend std::ostream& operator<< (std::ostream &out,Array<dTYPE> &oar){
+		INT_L sz=oar.Size();
 		out<<std::endl;
 		if(sz){out<<'{'<<std::endl;
-			INT_L ix=oar.ix+1;
+			INT_L ix=oar.Index();
 			for(INT_L nx=0;nx++<sz;){i::tab(1);
-				out<<'['<<nx<<']'<<(ix==nx?'>':' ')<<obj[nx]<<std::endl;
+				out<<'['<<nx<<']'<<(ix==nx?'>':' ')<<oar[nx]<<std::endl;
 			}
 			out<<'}';
 		}else out<<"NULL";
@@ -144,61 +175,62 @@ public:
 	#endif
 };
 
-ID_TYPE(21,Array<LOGIC>)
-ID_TYPE(22,Array<RANGE>)
-ID_TYPE(23,Array<LETTER>)
-ID_TYPE(24,Array<BYTE>)
-ID_TYPE(25,Array<INT_S>)
-ID_TYPE(26,Array<INT_W>)
-ID_TYPE(27,Array<INT_M>)
-ID_TYPE(28,Array<INT_L>)
-ID_TYPE(29,Array<INT_T>)
-ID_TYPE(30,Array<INT_B>)
-ID_TYPE(31,Array<FLOAT>)
-ID_TYPE(32,Array<DOUBLE>)
-ID_TYPE(33,Array<POINTER>)
-ID_TYPE(34,Array<DATETIME>)
-ID_TYPE(35,Array<STRING>)
+ID_TYPE(31,Array<LOGIC>)
+ID_TYPE(32,Array<LETTER>)
+ID_TYPE(33,Array<RANGE>)
+ID_TYPE(34,Array<BYTE>)
+ID_TYPE(35,Array<INT_S>)
+ID_TYPE(36,Array<INT_W>)
+ID_TYPE(37,Array<INT_M>)
+ID_TYPE(38,Array<INT_L>)
+ID_TYPE(39,Array<INT_T>)
+ID_TYPE(40,Array<INT_B>)
+ID_TYPE(41,Array<FLOAT>)
+ID_TYPE(42,Array<DOUBLE>)
+ID_TYPE(43,Array<ADDRESS>)
+ID_TYPE(44,Array<CHARS>)
+ID_TYPE(45,Array<STRING>)
+ID_TYPE(46,Array<DATETIME>)
 
 /** Аргументы */
-class Args :public Array<POINTER> {
+class Args :public Array<ADDRESS> {
 public:
 	Args(){}
 	template<typename... aARG>
-	Args(aARG... args){(this->Put(args), ...);}
-	~Args(){this->Clear();}
+	Args(aARG... args){(Put(args), ...);}
+	~Args(){Clear();}
 	void Clear(){
-		if(this->Size()){this->Reset();
+		if(Size()){Reset();
 			do{
-				delete static_cast<ANY*>(Array<POINTER>::operator[](0));
-			}while(this->Next());
-			Array<POINTER>::Clear();
+				delete static_cast<ANY*>(Array<ADDRESS>::operator[](0));
+			}while(Next());
+			Array<ADDRESS>::Clear();
 		}
 	}
-	ANY& operator[](INT_L index){
-		if(!this->Size())Array<POINTER>::Put(new ANY);
-		return *(ANY*)Array<POINTER>::operator[](index);
+	ANY& operator[](INT_L idx){
+		if(!Size())Array<ADDRESS>::Put(new ANY);
+		return *(ANY*)Array<ADDRESS>::operator[](idx);
 	}
 	template <typename dTYPE>
 	void Put(dTYPE val){
-		Array<POINTER>::Put(new ANY(val));
+		Array<ADDRESS>::Put(new ANY(val));
 	}
-	ANY Take(INT_L index=0){
+	ANY Take(INT_L idx=-1){
 		ANY res;
-		if(this->Size()){
-			POINTER pnt=Array<POINTER>::operator[](index);
+		if(Size()){
+			ADDRESS pnt=Array<ADDRESS>::Take(idx);
 			res=*(ANY*)pnt;delete static_cast<ANY*>(pnt);
 		}
 		return res;
 	}
 	#ifdef _GLIBCXX_IOSTREAM
-	friend std::ostream& operator<<(std::ostream &out,const Args &oar){
-		Args obj(oar);INT_L sz=obj.Size();
+	friend std::ostream& operator<<(std::ostream &out,Args &oar){
+		INT_L sz=oar.Size();
 		out<<std::endl;
 		if(sz){out<<'{'<<std::endl;
-			INT_L ix=obj.Index();
+			INT_L ix=oar.Index();
 			for(INT_L nx=0;nx++<sz;){i::tab(1);
-				out<<'['<<nx<<']'<<(ix==nx?'>':' ')<<obj[nx]<<std::endl;
+				out<<'['<<nx<<']'<<(ix==nx?'>':' ')<<oar[nx]<<std::endl;
 			}
 			out<<'}';
 		}else out<<"NULL";
@@ -206,8 +238,9 @@ public:
 	}
 	#endif
 };
-ID_TYPE(36,Args)
+ID_TYPE(47,Args)
 
+/*
 namespace a {
 	template<typename dTYPE>
 	INT_L Find(Array<dTYPE> obj,const dTYPE val){
@@ -222,7 +255,7 @@ namespace a {
 	}
 }
 
-/* * Аргументы * /
+/ * * Аргументы * /
 class Args {
 private:
 	//LOGIC dbl=false;
@@ -305,8 +338,8 @@ public:
 	#endif
 };
 ID_TYPE(17,Args)
-*/
-/* * Ассоциативный массив * /
+
+/ * * Ассоциативный массив * /
 class Associative {
 private:
 	Array<POINTER> *apr;
@@ -385,9 +418,7 @@ public:
 	}
 };
 ID_TYPE(18,Associative)
-*/
 
-/*
 #ifdef FILE_zests
 namespace a {
 	template <typename dTYPE>
@@ -409,4 +440,5 @@ namespace a {
 		std::cout <<'}';
 	}
 }
-#endif*/
+#endif
+*/

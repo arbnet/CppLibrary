@@ -5,16 +5,13 @@
 #define FILE_calc
 
 #include "_types.hpp"
-#include <stdio.h>
 
 namespace c {
 	
 	template <typename dTYPE>
 	dTYPE d10(dTYPE var){
 		BYTE num=BYTE(var%10);
-		while(num==0){
-			var=var/10;num=var%10;
-		}
+		while(num==0){var=var/10;num=var%10;}
 		return var;
 	}
 	/** Получение абсолютного значения
@@ -67,12 +64,7 @@ namespace c {
 		INT_B res=var*1000000;
 		return d10(res);
 	}
-	/*template<typename dTYPE>
-	STRING ToStr(dTYPE val){
-		POINTER<CHARS> lts;
-		sprintf(*lts,"%f",val);
-		return STRING(*lts);
-	}
+	/*
 	 * Получение шестнадтиричного значения байта
 	 * @param b байт 
 	 * @return HEX значение	* /

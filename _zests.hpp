@@ -32,92 +32,55 @@ namespace z {
 		pnt+=shift;
 	}
 	/** Сдвиг указателя
-	 * @param pnt указатель
+	 * @param adr указатель
 	 * @param shift смещение */
-	void Shift(ADDRESS &pnt,INT_S shift=1){
-		pnt=(ADDRESS*)((INT_B)pnt+shift);
+	void Shift(ADDRESS &adr,INT_S shift=1){
+		adr=(ADDRESS*)((INT_B)adr+shift);
 	}
 	/** Заполнение памяти значением
 	 * @param pnt указатель адреса
 	 * @param size размер\\длинна
 	 * @param val значение */
 	template <typename dTYPE=BYTE>
-	void Fill(ADDRESS &pnt,INT_W size,dTYPE val=0){
+	void Fill(ADDRESS &adr,INT_W size,dTYPE val=0){
 		while(size>0){
-			*(dTYPE*)pnt=val;Shift(pnt,sizeof(dTYPE));size--;
+			*(dTYPE*)adr=val;Shift(adr,sizeof(dTYPE));size--;
+		}
+	}
+	/** Перенос данных их одной области в другую
+	 * @param adr1 адрес куда переносим
+	 * @param adr2 адрес откуда переносим
+	 * @param cnt счётчик\\количество итераций */
+	template <typename dTYPE=BYTE>
+	inline void Same(ADDRESS &adr1,ADDRESS &adr2,INT_M cnt){
+		if(cnt){INT_S shi=sizeof(dTYPE);
+			if(cnt<0){shi=-shi;cnt=-cnt;}
+			do{
+				*(dTYPE*)adr1=*(dTYPE*)adr2;
+				Shift(adr1,shi);Shift(adr2,shi);
+			}while(--cnt>0);
 		}
 	}
 	/** Копирование в памяти
 	 * @param adr1 адрес куда копировать
 	 * @param adr2 адрес от куда копировать
-	 * @param size размер */
+	 * @param size размер\\длинна */
 	void Copy(ADDRESS &adr1,ADDRESS &adr2,INT_M size){
-		INT_W ct;
-		if(size>0){
-			ct=size/8;
-			if(ct>0){size=size%8;
-				do{
-					*(INT_B*)adr1=*(INT_B*)adr2;
-					Shift(adr1,8);Shift(adr2,8);ct--;
-				}while(ct>0);
-			}
-			ct=size/4;
-			if(ct>0){size=size%4;
-				do{
-					*(INT_L*)adr1=*(INT_L*)adr2;
-					Shift(adr1,4);Shift(adr2,4);ct--;
-				}while(ct>0);
-			}
-			ct=size/2;
-			if(ct>0){size=size%2;
-				do{
-					*(INT_W*)adr1=*(INT_W*)adr2;
-					Shift(adr1,2);Shift(adr2,2);ct--;
-				}while(ct>0);
-			}
-			if(size>0){ct=size;
-				do{
-					*(BYTE*)adr1=*(BYTE*)adr2;
-					Shift(adr1,1);Shift(adr2,1);ct--;
-				}while(ct>0);
-			}
-		}else{size=-size;
-			ct=size/8;
-			if(ct>0){size=size%8;
-				do{
-					Shift(adr1,-8);Shift(adr2,-8);ct--;
-					*(INT_B*)adr1=*(INT_B*)adr2;
-				}while(ct>0);
-			}
-			ct=size/4;
-			if(ct>0){size=size%4;
-				do{
-					Shift(adr1,-4);Shift(adr2,-4);ct--;
-					*(INT_L*)adr1=*(INT_L*)adr2;
-				}while(ct>0);
-			}
-			ct=size/2;
-			if(ct>0){size=size%2;
-				do{
-					Shift(adr1,-2);Shift(adr2,-2);ct--;
-					*(INT_W*)adr1=*(INT_W*)adr2;
-				}while(ct>0);
-			}
-			if(size>0){ct=size;
-				do{
-					Shift(adr1,-1);Shift(adr2,-1);ct--;
-					*(BYTE*)adr1=*(BYTE*)adr2;
-				}while(ct>0);
-			}
-		}
+		INT_M cnt;
+		BYTE dis=(size>0?(INT_B)adr2-(INT_B)adr1:(INT_B)adr1-(INT_B)adr2)%255;
+		cnt=size/8;if(cnt && dis>=8){size=size%8;Same<INT_B>(adr1,adr2,cnt);}
+		cnt=size/4;if(cnt && dis>=4){size=size%4;Same<INT_L>(adr1,adr2,cnt);}
+		cnt=size/2;if(cnt && dis>=2){size=size%2;Same<INT_W>(adr1,adr2,cnt);}
+		if(size>0){cnt=size;Same(adr1,adr2,cnt);}
 	}
 	/** Сравнение памяти
 	 * @param adr1 указатель адреса 1
 	 * @param adr2 указатель адреса 2
-	 * @param size размер\\длинна */
+	 * @param size размер\\длинна
+	 * @return `true` равно, `false` не равно */
 	LOGIC Compare(ADDRESS adr1,ADDRESS adr2,INT_W size){
 		LOGIC res=true;
-		while(size>0){
+		while(size>0 && res){
 			if(size>=8){
 				if(*(INT_B*)adr1!=*(INT_B*)adr2)res=false;
 				else{Shift(adr1,8);Shift(adr2,8);size-=8;}
@@ -131,60 +94,60 @@ namespace z {
 				if(*(BYTE*)adr1!=*(BYTE*)adr2)res=false;
 				else{Shift(adr1,1);Shift(adr2,1);size-=1;}
 			}
-			if(!res)break;
+			//if(!res)break;
 		}
 		return res;
 	}
 	/** Валидация индекса
-	 * @param index индекс
-	 * @param size размер массива */
-	void Index(INT_W &index,INT_W size){
-		if(index>0){
-			if(size>0){
-				if(index<=size)index--;
-				else{index=~index+1;
-					if(index<=size)index=size-index;
-					else index=size-1;
+	 * @param idx индекс
+	 * @param asz размер массива */
+	void Index(INT_W &idx,INT_W asz){
+		if(idx>0){
+			if(asz>0){
+				if(idx<=asz)idx--;
+				else{idx=~idx+1;
+					if(idx<=asz)idx=asz-idx;
+					else idx=asz-1;
 				}
-			}else index=0;
+			}else idx=0;
 		}
 	}
 	/** Валидация индекса
-	 * @param index индекс
-	 * @param size размер массива	*/
-	void Index(INT_L &index,INT_L size){
-		if(index>0){
-			if(size>0){
-				if(index<=size)index--;
-				else{index=~index+1;
-					if(index<=size)index=size-index;
-					else index=size-1;
+	 * @param idx индекс
+	 * @param asz размер массива	*/
+	void Index(INT_L &idx,INT_L asz){
+		if(idx>0){
+			if(asz>0){
+				if(idx<=asz)idx--;
+				else{idx=~idx+1;
+					if(idx<=asz)idx=asz-idx;
+					else idx=asz-1;
 				}
-			}else index=0;
+			}else idx=0;
 		}
 	}
 	/** Расчёт объёма от размера и резерва
 	 * @param sz текущий размер
-	 * @param mr резерв памяти
+	 * @param rv резерв памяти
 	 * @return значение объёма */
-	INT_W Volume(INT_W sz,INT_W mr){
-		INT_L res=mr+(sz/mr)*mr;
+	INT_W Volume(INT_W sz,INT_W rv){
+		INT_L res=rv+(sz/rv)*rv;
 		if(res>65535)res=65535;
 		return res;
 	}
 	/** Расчёт объёма от размера и резерва
 	 * @param sz текущий размер
-	 * @param mr резерв памяти
+	 * @param rv резерв памяти
 	 * @return значение объёма */
-	INT_L Volume(INT_L sz,INT_W mr){
-		INT_B res=mr+(sz/mr)*mr;
+	INT_L Volume(INT_L sz,INT_W rv){
+		INT_B res=rv+(sz/rv)*rv;
 		if(res>4294967295)res=4294967295;
 		return res;
 	}
 	/** Получение длинны массива символов
 	 * @param ltr массив символов
 	 * @return размер массива символов */
-	INT_W Lsize(CHARS(ltr)){
+	INT_W Lsize(CHARS ltr){
 		INT_W sz=0;
 		while(ltr[sz]!='\0'){sz++;if(sz==65535)break;}
 		return sz;

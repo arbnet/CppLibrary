@@ -17,11 +17,11 @@ namespace i {
 	 * @param tb число символов табуляции
 	 * @param sl символ табуляции	*/
 	void tab(INT_W tb=0,LETTER sl=' '){
-		INT_W szt=t+tb;
-		if(szt){
-			LETTER ltr[szt+1];ADDRESS pnt=ltr;
-			z::Fill(pnt,szt,(BYTE)sl);*(BYTE*)pnt=0;
-			cout<<ltr;
+		INT_W tsz=t+tb;
+		if(tsz){
+			LETTER lts[tsz+1];ADDRESS pnt=lts;
+			z::Fill(pnt,tsz,(BYTE)sl);*(BYTE*)pnt=0;
+			cout<<lts;
 		}
 	}
 	/** Ввод значения */
