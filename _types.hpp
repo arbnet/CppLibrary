@@ -168,6 +168,7 @@ public:
 		if(obj.guard)obj.guard=false;
 	}
 	~POINTER(){if(!obj)if(pnt)delete pnt;}
+	operator POINTER<CHARS>();
 	explicit operator bool(){return pnt?true:false;}
   dTYPE& operator*(){return *(dTYPE*)pnt;}
 	dTYPE& operator=(dTYPE val){
@@ -218,7 +219,7 @@ public:
 	POINTER<CHARS>(INT_W tl=32,INT_W rv=0):tl(tl),rv(!tl && !rv?32:rv){
 		pnt=new LETTER[tl+1];*(BYTE*)pnt=0;
 	}
-	POINTER<CHARS>(const LETTER *lts){
+	POINTER<CHARS>(CHARS lts){
 		sz=tl=z::Lsize(lts);rv=0;
 		pnt=new LETTER[tl+1];Assign(lts);
 	}
@@ -260,13 +261,26 @@ public:
 	/** Установка размера резервирования */
 	void Reserve(INT_W rv){this->rv=rv;}
 	#ifdef _GLIBCXX_IOSTREAM
-	friend std::ostream& operator<< (std::ostream &out,POINTER<CHARS> &obj){
+	friend std::ostream& operator<< (std::ostream &out,const POINTER<CHARS> &obj){
 		return obj.sz?out<<(LETTER*)obj.pnt:out<<"NULL";
 	}
 	#endif
 };
 
-//ID_TYPE(14,POINTER)
+ID_TYPE(21,POINTER<LOGIC>)
+ID_TYPE(22,POINTER<LETTER>)
+ID_TYPE(23,POINTER<RANGE>)
+ID_TYPE(24,POINTER<BYTE>)
+ID_TYPE(25,POINTER<INT_S>)
+ID_TYPE(26,POINTER<INT_W>)
+ID_TYPE(27,POINTER<INT_M>)
+ID_TYPE(28,POINTER<INT_L>)
+ID_TYPE(29,POINTER<INT_T>)
+ID_TYPE(30,POINTER<INT_B>)
+ID_TYPE(31,POINTER<FLOAT>)
+ID_TYPE(32,POINTER<DOUBLE>)
+ID_TYPE(33,POINTER<ADDRESS>)
+ID_TYPE(34,POINTER<CHARS>)
 
 /** Строка */
 class STRING :public POINTER<CHARS> {
@@ -398,8 +412,14 @@ public:
 		}
 		return res;
 	}
+	/*#ifdef _GLIBCXX_IOSTREAM
+	friend std::ostream& operator<< (std::ostream &out,STRING &obj){
+		return obj.sz?out<<(LETTER*)obj.pnt:out<<"NULL";
+	}
+	#endif*/
 };
 ID_TYPE(15,STRING)
+ID_TYPE(35,POINTER<STRING>)
 
 /** ДатаВремя */
 class DATETIME {
@@ -450,8 +470,34 @@ public:
 };
 ID_TYPE(16,DATETIME)
 
+/** Пространство имёт от _types */
+namespace t {
+	/** Получение Id переменной
+	 * @param var переменная 
+	 * @return Id переменной */
+	template<typename dTYPE>
+	INT_W Id(dTYPE var){
+		return ::Type<dTYPE>::Id;
+	}
+	/** Получение типа переменной
+	 * @param var переменная 
+	 * @return тип переменной */
+	template<typename dTYPE>
+	STRING Type(dTYPE var){
+		STRING vtp;
+		if(::Type<dTYPE>::Id)vtp=::Type<dTYPE>::Name;
+		else{vtp=typeid(var).name();
+			LETTER *lts=new LETTER[32];
+  		_itoa(vtp.Size()-1,lts,10);
+			vtp-=lts;delete lts;
+		}
+  	return vtp;
+	}
+}
+
 /** Ссылка */
 class LINK {
+protected:
 	STRING vtp;
 	ADDRESS pnt=NULL;
 	INT_W vsz=0,idt=0;
@@ -485,9 +531,9 @@ public:
 	template<typename dTYPE>
 	void Init(dTYPE &obj){
 		pnt=&obj;
+		vtp=t::Type(obj);
 		vsz=sizeof(dTYPE);
 		idt=::Type<dTYPE>::Id;
-		vtp=::Type<dTYPE>::Name;
 	}
 	/** Очистка ссылки */
 	void Clear(){
@@ -512,7 +558,8 @@ public:
 				case 13:out<<*(ADDRESS*)obj.pnt;break;
 				case 14:out<<*(CHARS*)obj.pnt;break;
 				case 15:out<<*(STRING*)obj.pnt;break;
-				//default:out<<obj.vtp;
+				case 34:out<<*(POINTER<CHARS>*)obj.pnt;break;
+				default:out<<obj.vtp;
 			}
 		}else out<<"NULL";
 		return out;
@@ -525,56 +572,80 @@ ID_TYPE(17,LINK)
 //ID_TYPE(19,резерв)
 
 /** Любой тип */
-class ANY {
+class ANY :public LINK {
 private:
-	LINK lnk;
 	void Clear(){
-		if(lnk){
-			switch(lnk.Id()){
-				case 1:	delete static_cast<LOGIC*>(*lnk);break;
-				case 2:	delete static_cast<LETTER*>(*lnk);break;
-				case 3:	delete static_cast<RANGE*>(*lnk);break;
-				case 4:	delete static_cast<BYTE*>(*lnk);break;
-				case 5:	delete static_cast<INT_S*>(*lnk);break;
-				case 6:	delete static_cast<INT_W*>(*lnk);break;
-				case 7:	delete static_cast<INT_M*>(*lnk);break;
-				case 8:	delete static_cast<INT_L*>(*lnk);break;
-				case 9:	delete static_cast<INT_T*>(*lnk);break;
-				case 10:delete static_cast<INT_B*>(*lnk);break;
-				case 11:delete static_cast<FLOAT*>(*lnk);break;
-				case 12:delete static_cast<DOUBLE*>(*lnk);break;
-				case 13:delete static_cast<ADDRESS*>(*lnk);break;
-				case 14:delete static_cast<CHARS*>(*lnk);break;
-				case 15:delete static_cast<STRING*>(*lnk);break;
-				case 16:delete static_cast<DATETIME*>(*lnk);break;
-				default:delete static_cast<LINK*>(*lnk);
+		if(pnt){
+			switch(idt){
+				case 1:	delete static_cast<LOGIC*>(pnt);break;
+				case 2:	delete static_cast<LETTER*>(pnt);break;
+				case 3:	delete static_cast<RANGE*>(pnt);break;
+				case 4:	delete static_cast<BYTE*>(pnt);break;
+				case 5:	delete static_cast<INT_S*>(pnt);break;
+				case 6:	delete static_cast<INT_W*>(pnt);break;
+				case 7:	delete static_cast<INT_M*>(pnt);break;
+				case 8:	delete static_cast<INT_L*>(pnt);break;
+				case 9:	delete static_cast<INT_T*>(pnt);break;
+				case 10:delete static_cast<INT_B*>(pnt);break;
+				case 11:delete static_cast<FLOAT*>(pnt);break;
+				case 12:delete static_cast<DOUBLE*>(pnt);break;
+				case 13:delete static_cast<ADDRESS*>(pnt);break;
+				case 14:delete static_cast<CHARS*>(pnt);break;
+				case 15:delete static_cast<STRING*>(pnt);break;
+				case 16:delete static_cast<DATETIME*>(pnt);break;
+				default:delete static_cast<LINK*>(pnt);
 			}
-			lnk.Clear();
+			LINK::Clear();
 		}
 	}
 public:
 	ANY(){}
 	template<typename dTYPE>
 	ANY(dTYPE val){*this=val;}
-	ANY(const ANY &obj):lnk(obj.lnk){}
+	//ANY(const ANY &obj):lnk(obj.lnk){}
 	~ANY(){Clear();}
-	explicit operator bool(){return (LOGIC)lnk;}
-	template<typename dTYPE>
-	explicit operator dTYPE(){return (dTYPE)lnk;}
+	//template<typename dTYPE>
+	//operator dTYPE(){return *(dTYPE*)pnt;}
 	template<typename dTYPE>
 	ANY& operator=(dTYPE val){
-		if(lnk.Id()==::Type<dTYPE>::Id)lnk=val;
+		if(idt==::Type<dTYPE>::Id)LINK::operator=(val);
 		else{
-			Clear();
-			if(!z::isNULL(val)){
+			if(z::isNULL(val))Clear();
+			else{
 				dTYPE *obj=new dTYPE(val);
-				lnk.Init(*obj);
+				LINK::Init(*obj);
 			}
 		}
 		return *this;
 	}
-	ANY& operator=(CHARS(ltr)){
-		STRING *str=new STRING(ltr);*this=*str;
+	ANY& operator=(CHARS lts){
+		if(idt==34)LINK::operator=(*lts);
+		else{
+			POINTER<CHARS> *pnt=new POINTER<CHARS>(lts);
+			LINK::Init(*pnt);
+		}
+		return *this;
+	}
+	/*ANY& operator=(ANY &obj){
+		cout<<obj<<' '<<obj.Id()<<' '<<obj.Type()<<endl;
+		switch(lnk.Id()){
+			case 1:	*this=(LOGIC)obj;break;
+			case 2:	*this=(LETTER)obj;break;
+			case 3:	*this=(RANGE)obj;break;
+			case 4:	*this=(BYTE)obj;break;
+			case 5:	*this=(INT_S)obj;break;
+			case 6:	*this=(INT_W)obj;break;
+			case 7:	*this=(INT_M)obj;break;
+			case 8:	*this=(INT_L)obj;break;
+			case 9:	*this=(INT_T)obj;break;
+			case 10:*this=(INT_B)obj;break;
+			case 11:*this=(FLOAT)obj;break;
+			case 12:*this=(DOUBLE)obj;break;
+			case 13:*this=(ADDRESS)obj;break;
+			//case 14:*this=(DATETIME)obj;break;
+			//case 15:*this=(STRING)obj;break;
+			//default:*this=*(Link*)obj.mdt->pnt;
+		}
 		return *this;
 	}
 	ANY& operator++(int){
@@ -738,39 +809,14 @@ public:
 		#endif
 		CATCH
 		return *this;
-	}
-	INT_W Id(){return lnk.Id();}
-	INT_W Size(){return lnk.Size();}
-	STRING Type(){return lnk.Type();}
-	#ifdef _GLIBCXX_IOSTREAM
+	}*/
+	//INT_W Id(){return lnk.Id();}
+	//INT_W Size(){return lnk.Size();}
+	//STRING Type(){return lnk.Type();}
+	/*#ifdef _GLIBCXX_IOSTREAM
 	friend std::ostream& operator<< (std::ostream &out,const ANY &obj){
 		return out<<obj.lnk;
 	}
-	#endif
-}; 
+	#endif*/
+};
 ID_TYPE(20,ANY)
-
-/** Пространство имёт от _types */
-namespace t {
-	/** Получение Id переменной
-	 * @param var переменная 
-	 * @return Id переменной */
-	template<typename dTYPE>
-	INT_W Id(dTYPE var){
-		return ::Type<dTYPE>::Id;
-	}
-	/** Получение типа переменной
-	 * @param var переменная 
-	 * @return тип переменной */
-	template<typename dTYPE>
-	STRING Type(dTYPE var){
-		STRING vtp;
-		if(::Type<dTYPE>::Id)vtp=::Type<dTYPE>::Name;
-		else{vtp=typeid(var).name();
-			LETTER *lts=new LETTER[20];
-  		INT_M len=vtp.Size()-1;
-  		_itoa(len,lts,10);vtp-=lts;
-		}
-  	return vtp;
-	}
-}
