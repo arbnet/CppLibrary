@@ -412,6 +412,7 @@ public:
 		}
 		return res;
 	}
+	void Kill()=delete;
 	/*#ifdef _GLIBCXX_IOSTREAM
 	friend std::ostream& operator<< (std::ostream &out,STRING &obj){
 		return obj.sz?out<<(LETTER*)obj.pnt:out<<"NULL";
@@ -566,10 +567,10 @@ public:
 	}
 	#endif
 };
-ID_TYPE(17,LINK)
+ID_TYPE(19,LINK)
 
+//ID_TYPE(17,резерв)
 //ID_TYPE(18,резерв)
-//ID_TYPE(19,резерв)
 
 /** Любой тип */
 class ANY :public LINK {
@@ -590,7 +591,7 @@ private:
 				case 11:delete static_cast<FLOAT*>(pnt);break;
 				case 12:delete static_cast<DOUBLE*>(pnt);break;
 				case 13:delete static_cast<ADDRESS*>(pnt);break;
-				case 14:delete static_cast<CHARS*>(pnt);break;
+				case 14:delete static_cast<LETTER*>(pnt);break;
 				case 15:delete static_cast<STRING*>(pnt);break;
 				case 16:delete static_cast<DATETIME*>(pnt);break;
 				default:delete static_cast<LINK*>(pnt);
@@ -618,12 +619,12 @@ public:
 		}
 		return *this;
 	}
-	ANY& operator=(CHARS lts){
-		if(idt==34)LINK::operator=(*lts);
-		else{
-			POINTER<CHARS> *pnt=new POINTER<CHARS>(lts);
-			LINK::Init(*pnt);
-		}
+	ANY& operator=(CHARS chs){
+		Clear();
+		INT_W sz=z::Lsize(chs)+1;
+		CHARS lts=new LETTER[sz];
+		ADDRESS adr1=(ADDRESS)lts,adr2=(ADDRESS)chs;
+		z::Copy(adr1,adr2,sz);LINK::Init(lts);
 		return *this;
 	}
 	/*ANY& operator=(ANY &obj){

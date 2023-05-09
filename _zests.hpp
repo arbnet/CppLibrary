@@ -145,11 +145,11 @@ namespace z {
 		return res;
 	}
 	/** Получение длинны массива символов
-	 * @param ltr массив символов
+	 * @param chs массив символов
 	 * @return размер массива символов */
-	INT_W Lsize(CHARS ltr){
+	INT_W Lsize(CHARS chs){
 		INT_W sz=0;
-		while(ltr[sz]!='\0'){sz++;if(sz==65535)break;}
+		while(chs[sz]!='\0'){sz++;if(sz==65535)break;}
 		return sz;
 	}
 	/** Проверка на NULL
