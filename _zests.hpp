@@ -10,7 +10,7 @@
 
 /** Пространство имёт от _zests */
 namespace z {
-		/** Поменять местами переменные
+	/** Поменять местами переменные
 	 * @param vr1 переменная 1
 	 * @param vr2 переменная 2	*/
 	template <typename dTYPE>
@@ -149,16 +149,7 @@ namespace z {
 	 * @return размер массива символов */
 	INT_W Lsize(CHARS chs){
 		INT_W sz=0;
-		while(chs[sz]!='\0'){sz++;if(sz==65535)break;}
-		return sz;
-	}
-	/** Проверка на NULL
-	 * @param val переменная
-	 * @return `true` NULL, иначе `false` */
-	template <typename dTYPE>
-	LOGIC isNULL(dTYPE val){
-		LOGIC res=false;
-		if(::Type<dTYPE>::Name=="INT_T")if(!val)res=true;
-		return res;
+    while (*chs++){sz++;if(sz==65535)break;}
+    return sz;
 	}
 }

@@ -291,7 +291,7 @@ public:
 	STRING(const LETTER *lts):POINTER<CHARS>(lts){}
 	STRING(const STRING &obj):POINTER<CHARS>(obj.pnt){}
 	STRING(INT_W tl=0,INT_W rv=0):POINTER<CHARS>(tl,rv){}
-	explicit operator bool(){return sz?true:false;}
+	operator bool(){return sz?true:false;}
 	template<typename dTYPE, typename = t::Enable<t::isBase<dTYPE>,dTYPE>>
 	STRING(dTYPE val){
 		POINTER<CHARS> lts;
@@ -428,9 +428,24 @@ class DATETIME {
 public:
 	DATETIME(time_t dtm=0){this->dtm=dtm;}
 	DATETIME(const DATETIME &obj):dtm(obj.dtm){}
-	operator INT_B(){return (INT_B)this->dtm;}
+	operator INT_B(){return (INT_B)dtm;}
+	operator DateTime(){
+		DateTimeU udt;
+		udt.stm=*localtime(&dtm);
+		udt.dtm.year+=1900;
+		udt.dtm.month+=1;
+		return udt.dtm;
+	}
 	DATETIME& operator=(time_t val){
 		this->dtm=val;return *this;
+	}
+	DATETIME& operator=(DateTime dtm){
+		DateTimeU udt;
+		udt.dtm=dtm;
+		udt.dtm.month-=1;
+		udt.dtm.year-=1900;
+		this->dtm=mktime(&udt.stm);
+		return *this;
 	}
 	DATETIME& operator+=(time_t val){
 		this->dtm+=val;return *this;
@@ -442,32 +457,20 @@ public:
 	void Clock(){this->dtm=clock();}
 	/** Текущее время */
 	void Now(){this->dtm=time(NULL);}
-	/** Установка из структуры даты-времени
-	 * @param std структура даты-времени */
-	void Data(DateTime sdt){
-		DateTimeU udt;
-		udt.dtm=sdt;
-		udt.dtm.month-=1;
-		udt.dtm.year-=1900;
-		this->dtm=mktime(&udt.stm);
-	}
-	/** Получение структуры даты-времени */
-	DateTime Data(){
-		DateTimeU udt;
-		udt.stm=*localtime(&this->dtm);
-		udt.dtm.year+=1900;
-		udt.dtm.month+=1;
-		return udt.dtm;
-	}
 	/** Получение строкового представления даты-времени
 	 * @param fmt формат даты-времени
 	 * @param bsz размер буфера формирования строки
 	 * @return строка с датой-временем */
-	STRING Format(STRING fmt="%Y.%m.%d %H:%M:%S",BYTE bsz=64){
-		LETTER res[bsz];
-		strftime(res,bsz,*fmt,localtime(&this->dtm));
+	STRING Format(STRING fmt="%Y.%m.%d %H:%M:%S",INT_W sbf=64){
+		LETTER res[sbf];
+		strftime(res,sbf,*fmt,localtime(&dtm));
 		return STRING(res);
 	}
+	#ifdef _GLIBCXX_IOSTREAM
+	friend std::ostream& operator<< (std::ostream &out,const DATETIME &obj){
+		return out<<obj.dtm;
+	}
+	#endif
 };
 ID_TYPE(16,DATETIME)
 
@@ -536,6 +539,12 @@ public:
 		vsz=sizeof(dTYPE);
 		idt=::Type<dTYPE>::Id;
 	}
+	void Init(CHARS chs){
+		pnt=(ADDRESS)chs;
+		vtp="CHARS";
+		vsz=z::Lsize(chs);
+		idt=::Type<CHARS>::Id;
+	}
 	/** Очистка ссылки */
 	void Clear(){
 		pnt=NULL;vsz=idt=0;vtp="";
@@ -557,8 +566,9 @@ public:
 				case 11:out<<*(FLOAT*)obj.pnt;break;
 				case 12:out<<*(DOUBLE*)obj.pnt;break;
 				case 13:out<<*(ADDRESS*)obj.pnt;break;
-				case 14:out<<*(CHARS*)obj.pnt;break;
+				case 14:out<<(CHARS)obj.pnt;break;
 				case 15:out<<*(STRING*)obj.pnt;break;
+				case 16:out<<*(DATETIME*)obj.pnt;break;
 				case 34:out<<*(POINTER<CHARS>*)obj.pnt;break;
 				default:out<<obj.vtp;
 			}
@@ -574,7 +584,31 @@ ID_TYPE(19,LINK)
 
 /** Любой тип */
 class ANY :public LINK {
-private:
+public:
+	ANY(){}
+	template<typename dTYPE>
+	ANY(dTYPE val){*this=val;}
+	ANY(const ANY &obj){
+		cout<<"RRRRR";
+	}
+	~ANY(){Clear();}
+	template<typename dTYPE>
+	ANY& operator=(dTYPE val){
+		INT_W tid=::Type<dTYPE>::Id;
+		if(idt==tid)LINK::operator=(val);
+		else if(tid){
+			dTYPE *obj=new dTYPE(val);LINK::Init(*obj);
+		}else LINK::Init(val);
+		return *this;
+	}
+	ANY& operator=(CHARS chs){
+		Clear();
+		INT_W sz=z::Lsize(chs)+1;
+		CHARS lts=new LETTER[sz];
+		ADDRESS adr1=(ADDRESS)lts,adr2=(ADDRESS)chs;
+		z::Copy(adr1,adr2,sz);LINK::Init(lts);
+		return *this;
+	}
 	void Clear(){
 		if(pnt){
 			switch(idt){
@@ -591,45 +625,15 @@ private:
 				case 11:delete static_cast<FLOAT*>(pnt);break;
 				case 12:delete static_cast<DOUBLE*>(pnt);break;
 				case 13:delete static_cast<ADDRESS*>(pnt);break;
-				case 14:delete static_cast<LETTER*>(pnt);break;
+				case 14:delete static_cast<CHARS>(pnt);break;
 				case 15:delete static_cast<STRING*>(pnt);break;
 				case 16:delete static_cast<DATETIME*>(pnt);break;
-				default:delete static_cast<LINK*>(pnt);
 			}
 			LINK::Clear();
 		}
 	}
-public:
-	ANY(){}
-	template<typename dTYPE>
-	ANY(dTYPE val){*this=val;}
-	//ANY(const ANY &obj):lnk(obj.lnk){}
-	~ANY(){Clear();}
-	//template<typename dTYPE>
-	//operator dTYPE(){return *(dTYPE*)pnt;}
-	template<typename dTYPE>
-	ANY& operator=(dTYPE val){
-		if(idt==::Type<dTYPE>::Id)LINK::operator=(val);
-		else{
-			if(z::isNULL(val))Clear();
-			else{
-				dTYPE *obj=new dTYPE(val);
-				LINK::Init(*obj);
-			}
-		}
-		return *this;
-	}
-	ANY& operator=(CHARS chs){
-		Clear();
-		INT_W sz=z::Lsize(chs)+1;
-		CHARS lts=new LETTER[sz];
-		ADDRESS adr1=(ADDRESS)lts,adr2=(ADDRESS)chs;
-		z::Copy(adr1,adr2,sz);LINK::Init(lts);
-		return *this;
-	}
-	/*ANY& operator=(ANY &obj){
-		cout<<obj<<' '<<obj.Id()<<' '<<obj.Type()<<endl;
-		switch(lnk.Id()){
+	ANY& operator=(ANY &obj){
+		switch(obj.Id()){
 			case 1:	*this=(LOGIC)obj;break;
 			case 2:	*this=(LETTER)obj;break;
 			case 3:	*this=(RANGE)obj;break;
@@ -650,27 +654,25 @@ public:
 		return *this;
 	}
 	ANY& operator++(int){
-		switch(lnk.Id()){
-			case 1:	lnk=(LOGIC)((LOGIC)lnk?0:1);break;
-			case 2:	lnk=(LETTER)((LETTER)lnk+1);break;
-			case 3:	lnk=(RANGE)((RANGE)lnk+1);break;
-			case 4:	lnk=(BYTE)((BYTE)lnk+1);break;
-			case 5:	lnk=(INT_S)((INT_S)lnk+1);break;
-			case 6:	lnk=(INT_W)((INT_W)lnk+1);break;
-			case 7:	lnk=(INT_M)((INT_M)lnk+1);break;
-			case 8:	lnk=(INT_L)((INT_L)lnk+1);break;
-			case 9:	lnk=(INT_T)((INT_T)lnk+1);break;
-			case 10:lnk=(INT_B)((INT_B)lnk+1);break;
-			case 11:lnk=(FLOAT)lnk+(FLOAT)0.01;break;
-			case 12:lnk=(DOUBLE)lnk+(DOUBLE)0.0001;break;
-			//case 13:lnk=(POINTER)lnk+1;break;
-			//case 14:lnk=(DATETIME)lnk+1;break;
-			//case 15:lnk=(STRING)lnk+1;break;
-			//default:
+		switch(idt){
+			case 1:	*this=LOGIC(*(LOGIC*)pnt?0:1);break;
+			case 2:	*this=LETTER(*(LETTER*)pnt+1);break;
+			case 3:	*this=RANGE(*(RANGE*)pnt+1);break;
+			case 4:	*this=BYTE(*(BYTE*)pnt+1);break;
+			case 5:	*this=INT_S(*(INT_S*)pnt+1);break;
+			case 6:	*this=INT_W(*(INT_W*)pnt+1);break;
+			case 7:	*this=INT_M(*(INT_M*)pnt+1);break;
+			case 8:	*this=INT_L(*(INT_L*)pnt+1);break;
+			case 9:	*this=INT_T(*(INT_T*)pnt+1);break;
+			case 10:*this=INT_B(*(INT_B*)pnt+1);break;
+			case 11:*this=FLOAT(*(FLOAT*)pnt+0.01);break;
+			case 12:*this=DOUBLE(*(DOUBLE*)pnt+0.0001);break;
+			case 13:*this=ADDRESS(*(INT_B*)pnt+1);break;
+			case 16:*this=DATETIME(*(DATETIME*)pnt+1);break;
 		}
 		return *this;
 	}
-	ANY& operator--(int){
+	/*ANY& operator--(int){
 		switch(lnk.Id()){
 			case 1:	lnk=(LOGIC)((LOGIC)lnk?0:1);break;
 			case 2:	lnk=(LETTER)((LETTER)lnk-1);break;
