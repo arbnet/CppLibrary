@@ -137,9 +137,9 @@ namespace t {
 	/** Ниличие типа в перечне */
 	template <typename dTYPE, typename ...aTYPE>
 	struct IsMatch{static constexpr bool v{(Match<dTYPE,aTYPE>::v || ...)};};
-	/** Проверка на основной тип данных */
+	/** Проверка на базовый тип данных */
 	template <typename dTYPE>
-	constexpr bool isBase=IsMatch<dTYPE,LOGIC,LETTER,RANGE,BYTE,INT_S,INT_W,INT_M,INT_L,INT_T,INT_B,FLOAT,DOUBLE,ADDRESS>::v;
+	constexpr bool isBaseB=IsMatch<dTYPE,LOGIC,LETTER,RANGE,BYTE,INT_S,INT_W,INT_M,INT_L,INT_T,INT_B,FLOAT,DOUBLE,ADDRESS>::v;
 	/** Проверка на целочисленный тип данных */
 	template <typename dTYPE>
 	constexpr bool isInteger=IsMatch<dTYPE,RANGE,BYTE,INT_S,INT_W,INT_M,INT_L,INT_T,INT_B>::v;
@@ -292,7 +292,7 @@ public:
 	STRING(const STRING &obj):POINTER<CHARS>(obj.pnt){}
 	STRING(INT_W tl=0,INT_W rv=0):POINTER<CHARS>(tl,rv){}
 	operator bool(){return sz?true:false;}
-	template<typename dTYPE, typename = t::Enable<t::isBase<dTYPE>,dTYPE>>
+	template<typename dTYPE, typename = t::Enable<t::isBaseB<dTYPE>,dTYPE>>
 	STRING(dTYPE val){
 		POINTER<CHARS> lts;
 		INT_W vid=::Type<dTYPE>::Id;
@@ -413,11 +413,6 @@ public:
 		return res;
 	}
 	void Kill()=delete;
-	/*#ifdef _GLIBCXX_IOSTREAM
-	friend std::ostream& operator<< (std::ostream &out,STRING &obj){
-		return obj.sz?out<<(LETTER*)obj.pnt:out<<"NULL";
-	}
-	#endif*/
 };
 ID_TYPE(15,STRING)
 ID_TYPE(35,POINTER<STRING>)
@@ -474,8 +469,15 @@ public:
 };
 ID_TYPE(16,DATETIME)
 
+//ID_TYPE(17,резерв)
+//ID_TYPE(18,резерв)
+
 /** Пространство имёт от _types */
 namespace t {
+	/** Проверка на основной тип данных */
+	template <typename dTYPE>
+	constexpr bool isBaseA=IsMatch<dTYPE,LOGIC,LETTER,RANGE,BYTE,INT_S,INT_W,INT_M,INT_L,INT_T,INT_B,FLOAT,DOUBLE,ADDRESS,CHARS,STRING,DATETIME>::v;
+
 	/** Получение Id переменной
 	 * @param var переменная 
 	 * @return Id переменной */
@@ -515,7 +517,7 @@ public:
 	operator dTYPE(){return *(dTYPE*)pnt;}
 	explicit operator bool(){return pnt?true:false;}
 	template<typename dTYPE>
-	t::Enable<t::isBase<dTYPE>,LINK&> operator=(dTYPE val){
+	t::Enable<t::isBaseA<dTYPE>,LINK&> operator=(dTYPE val){
 		TRY
 		if(idt==::Type<dTYPE>::Id)*(dTYPE*)pnt=val;
 		#ifdef FILE_error
@@ -523,6 +525,28 @@ public:
 		#endif
 		CATCH
 		return *this;
+	}
+	template<typename dTYPE>
+	t::Enable<t::isBaseA<dTYPE>,LOGIC> operator==(dTYPE val){
+		LOGIC res=false;
+		TRY
+		if(idt==::Type<dTYPE>::Id)res=*(dTYPE*)pnt==val;
+		#ifdef FILE_error
+		else throw Error("LINK == не соответствует типу!");
+		#endif
+		CATCH
+		return res;
+	}
+	template<typename dTYPE>
+	t::Enable<t::isBaseA<dTYPE>,LOGIC> operator!=(dTYPE val){
+		LOGIC res=false;
+		TRY
+		if(idt==::Type<dTYPE>::Id)res=*(dTYPE*)pnt!=val;
+		#ifdef FILE_error
+		else throw Error("LINK == не соответствует типу!");
+		#endif
+		CATCH
+		return res;
 	}
 	/** Получение Id данных */
 	INT_W Id(){return this->idt;}
@@ -579,19 +603,15 @@ public:
 };
 ID_TYPE(19,LINK)
 
-//ID_TYPE(17,резерв)
-//ID_TYPE(18,резерв)
-
 /** Любой тип */
 class ANY :public LINK {
 public:
 	ANY(){}
 	template<typename dTYPE>
 	ANY(dTYPE val){*this=val;}
-	ANY(const ANY &obj){
-		cout<<"RRRRR";
-	}
+	//ANY(const ANY &obj){}
 	~ANY(){Clear();}
+	ADDRESS operator*(){return pnt;}
 	template<typename dTYPE>
 	ANY& operator=(dTYPE val){
 		INT_W tid=::Type<dTYPE>::Id;
@@ -608,29 +628,6 @@ public:
 		ADDRESS adr1=(ADDRESS)lts,adr2=(ADDRESS)chs;
 		z::Copy(adr1,adr2,sz);LINK::Init(lts);
 		return *this;
-	}
-	void Clear(){
-		if(pnt){
-			switch(idt){
-				case 1:	delete static_cast<LOGIC*>(pnt);break;
-				case 2:	delete static_cast<LETTER*>(pnt);break;
-				case 3:	delete static_cast<RANGE*>(pnt);break;
-				case 4:	delete static_cast<BYTE*>(pnt);break;
-				case 5:	delete static_cast<INT_S*>(pnt);break;
-				case 6:	delete static_cast<INT_W*>(pnt);break;
-				case 7:	delete static_cast<INT_M*>(pnt);break;
-				case 8:	delete static_cast<INT_L*>(pnt);break;
-				case 9:	delete static_cast<INT_T*>(pnt);break;
-				case 10:delete static_cast<INT_B*>(pnt);break;
-				case 11:delete static_cast<FLOAT*>(pnt);break;
-				case 12:delete static_cast<DOUBLE*>(pnt);break;
-				case 13:delete static_cast<ADDRESS*>(pnt);break;
-				case 14:delete static_cast<CHARS>(pnt);break;
-				case 15:delete static_cast<STRING*>(pnt);break;
-				case 16:delete static_cast<DATETIME*>(pnt);break;
-			}
-			LINK::Clear();
-		}
 	}
 	ANY& operator=(ANY &obj){
 		switch(obj.Id()){
@@ -672,31 +669,29 @@ public:
 		}
 		return *this;
 	}
-	/*ANY& operator--(int){
-		switch(lnk.Id()){
-			case 1:	lnk=(LOGIC)((LOGIC)lnk?0:1);break;
-			case 2:	lnk=(LETTER)((LETTER)lnk-1);break;
-			case 3:	lnk=(RANGE)((RANGE)lnk-1);break;
-			case 4:	lnk=(BYTE)((BYTE)lnk-1);break;
-			case 5:	lnk=(INT_S)((INT_S)lnk-1);break;
-			case 6:	lnk=(INT_W)((INT_W)lnk-1);break;
-			case 7:	lnk=(INT_M)((INT_M)lnk-1);break;
-			case 8:	lnk=(INT_L)((INT_L)lnk-1);break;
-			case 9:	lnk=(INT_T)((INT_T)lnk-1);break;
-			case 10:lnk=(INT_B)((INT_B)lnk-1);break;
-			case 11:lnk=(FLOAT)lnk-(FLOAT)0.01;break;
-			case 12:lnk=(DOUBLE)lnk-(DOUBLE)0.0001;break;
-			//case 13:lnk=(POINTER)lnk+1;break;
-			//case 14:lnk=(DATETIME)lnk+1;break;
-			//case 15:lnk=(STRING)lnk+1;break;
-			//default:
+	ANY& operator--(int){
+		switch(idt){
+			case 1:	*this=LOGIC(*(LOGIC*)pnt?0:1);break;
+			case 2:	*this=LETTER(*(LETTER*)pnt-1);break;
+			case 3:	*this=RANGE(*(RANGE*)pnt-1);break;
+			case 4:	*this=BYTE(*(BYTE*)pnt-1);break;
+			case 5:	*this=INT_S(*(INT_S*)pnt-1);break;
+			case 6:	*this=INT_W(*(INT_W*)pnt-1);break;
+			case 7:	*this=INT_M(*(INT_M*)pnt-1);break;
+			case 8:	*this=INT_L(*(INT_L*)pnt-1);break;
+			case 9:	*this=INT_T(*(INT_T*)pnt-1);break;
+			case 10:*this=INT_B(*(INT_B*)pnt-1);break;
+			case 11:*this=FLOAT(*(FLOAT*)pnt-0.01);break;
+			case 12:*this=DOUBLE(*(DOUBLE*)pnt-0.0001);break;
+			case 13:*this=ADDRESS(*(INT_B*)pnt-1);break;
+			case 16:*this=DATETIME(*(DATETIME*)pnt-1);break;
 		}
 		return *this;
 	}
 	template<typename dTYPE>
 	ANY& operator+(dTYPE val){
 		TRY
-		if(lnk.Id()==::Type<dTYPE>::Id)lnk=(dTYPE)lnk+val;
+		if(idt==::Type<dTYPE>::Id)LINK::operator=(dTYPE(*(dTYPE*)pnt+val));
 		#ifdef FILE_error
 		else throw Error("Оператор + не соответствует типу!");
 		#endif
@@ -706,7 +701,7 @@ public:
 	template<typename dTYPE>
 	ANY& operator-(dTYPE val){
 		TRY
-		if(lnk.Id()==::Type<dTYPE>::Id)lnk=(dTYPE)lnk-val;
+		if(idt==::Type<dTYPE>::Id)LINK::operator=(dTYPE(*(dTYPE*)pnt-val));
 		#ifdef FILE_error
 		else throw Error("Оператор - не соответствует типу!");
 		#endif
@@ -716,7 +711,7 @@ public:
 	template<typename dTYPE>
 	ANY& operator*(dTYPE val){
 		TRY
-		if(lnk.Id()==::Type<dTYPE>::Id)lnk=(dTYPE)lnk*val;
+		if(idt==::Type<dTYPE>::Id)LINK::operator=(dTYPE(*(dTYPE*)pnt*val));
 		#ifdef FILE_error
 		else throw Error("Оператор * не соответствует типу!");
 		#endif
@@ -726,7 +721,7 @@ public:
 	template<typename dTYPE>
 	ANY& operator/(dTYPE val){
 		TRY
-		if(lnk.Id()==::Type<dTYPE>::Id)lnk=(dTYPE)lnk/val;
+		if(idt==::Type<dTYPE>::Id)LINK::operator=(dTYPE(*(dTYPE*)pnt/val));
 		#ifdef FILE_error
 		else throw Error("Оператор / не соответствует типу!");
 		#endif
@@ -736,7 +731,7 @@ public:
 	template<typename dTYPE>
 	ANY& operator+=(dTYPE val){
 		TRY
-		if(lnk.Id()==::Type<dTYPE>::Id)lnk=(dTYPE)lnk+val;
+		if(idt==::Type<dTYPE>::Id)LINK::operator=(dTYPE(*(dTYPE*)pnt+val));
 		#ifdef FILE_error
 		else throw Error("Оператор += не соответствует типу!");
 		#endif
@@ -746,7 +741,7 @@ public:
 	template<typename dTYPE>
 	ANY& operator-=(dTYPE val){
 		TRY
-		if(lnk.Id()==::Type<dTYPE>::Id)lnk=(dTYPE)lnk-val;
+		if(idt==::Type<dTYPE>::Id)LINK::operator=(dTYPE(*(dTYPE*)pnt-val));
 		#ifdef FILE_error
 		else throw Error("Оператор -= не соответствует типу!");
 		#endif
@@ -756,7 +751,7 @@ public:
 	template<typename dTYPE>
 	ANY& operator*=(dTYPE val){
 		TRY
-		if(lnk.Id()==::Type<dTYPE>::Id)lnk=(dTYPE)lnk*val;
+		if(idt==::Type<dTYPE>::Id)LINK::operator=(dTYPE(*(dTYPE*)pnt*val));
 		#ifdef FILE_error
 		else throw Error("Оператор *= не соответствует типу!");
 		#endif
@@ -766,7 +761,7 @@ public:
 	template<typename dTYPE>
 	ANY& operator/=(dTYPE val){
 		TRY
-		if(lnk.Id()==::Type<dTYPE>::Id)lnk=(dTYPE)lnk/val;
+		if(idt==::Type<dTYPE>::Id)LINK::operator=(dTYPE(*(dTYPE*)pnt/val));
 		#ifdef FILE_error
 		else throw Error("Оператор /= не соответствует типу!");
 		#endif
@@ -776,7 +771,7 @@ public:
 	template<typename dTYPE>
 	ANY& operator%=(dTYPE val){
 		TRY
-		if(lnk.Id()==::Type<dTYPE>::Id)lnk=(dTYPE)lnk%val;
+		if(idt==::Type<dTYPE>::Id)LINK::operator=(dTYPE(*(dTYPE*)pnt%val));
 		#ifdef FILE_error
 		else throw Error("Оператор %= не соответствует типу!");
 		#endif
@@ -786,7 +781,7 @@ public:
 	template<typename dTYPE>
 	ANY& operator&=(dTYPE val){
 		TRY
-		if(lnk.Id()==::Type<dTYPE>::Id)lnk=(dTYPE)lnk&val;
+		if(idt==::Type<dTYPE>::Id)LINK::operator=(dTYPE(*(dTYPE*)pnt&val));
 		#ifdef FILE_error
 		else throw Error("Оператор &= не соответствует типу!");
 		#endif
@@ -796,7 +791,7 @@ public:
 	template<typename dTYPE>
 	ANY& operator|=(dTYPE val){
 		TRY
-		if(lnk.Id()==::Type<dTYPE>::Id)lnk=(dTYPE)lnk|val;
+		if(idt==::Type<dTYPE>::Id)LINK::operator=(dTYPE(*(dTYPE*)pnt|val));
 		#ifdef FILE_error
 		else throw Error("Оператор |= не соответствует типу!");
 		#endif
@@ -806,16 +801,36 @@ public:
 	template<typename dTYPE>
 	ANY& operator^=(dTYPE val){
 		TRY
-		if(lnk.Id()==::Type<dTYPE>::Id)lnk=(dTYPE)lnk^val;
+		if(idt==::Type<dTYPE>::Id)LINK::operator=(dTYPE(*(dTYPE*)pnt^val));
 		#ifdef FILE_error
 		else throw Error("Оператор ^= не соответствует типу!");
 		#endif
 		CATCH
 		return *this;
-	}*/
-	//INT_W Id(){return lnk.Id();}
-	//INT_W Size(){return lnk.Size();}
-	//STRING Type(){return lnk.Type();}
+	}
+	void Clear(){
+		if(pnt){
+			switch(idt){
+				case 1:	delete static_cast<LOGIC*>(pnt);break;
+				case 2:	delete static_cast<LETTER*>(pnt);break;
+				case 3:	delete static_cast<RANGE*>(pnt);break;
+				case 4:	delete static_cast<BYTE*>(pnt);break;
+				case 5:	delete static_cast<INT_S*>(pnt);break;
+				case 6:	delete static_cast<INT_W*>(pnt);break;
+				case 7:	delete static_cast<INT_M*>(pnt);break;
+				case 8:	delete static_cast<INT_L*>(pnt);break;
+				case 9:	delete static_cast<INT_T*>(pnt);break;
+				case 10:delete static_cast<INT_B*>(pnt);break;
+				case 11:delete static_cast<FLOAT*>(pnt);break;
+				case 12:delete static_cast<DOUBLE*>(pnt);break;
+				case 13:delete static_cast<ADDRESS*>(pnt);break;
+				case 14:delete static_cast<CHARS>(pnt);break;
+				case 15:delete static_cast<STRING*>(pnt);break;
+				case 16:delete static_cast<DATETIME*>(pnt);break;
+			}
+			LINK::Clear();
+		}
+	}
 	/*#ifdef _GLIBCXX_IOSTREAM
 	friend std::ostream& operator<< (std::ostream &out,const ANY &obj){
 		return out<<obj.lnk;
