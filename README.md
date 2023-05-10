@@ -8,11 +8,11 @@
 ## Перечень заголовочных файлов
 |#|?|Наименование|Описание|Зависимости|
 |:-:|:-:|--|--|--|
-|A|+|\_array|Массивы|\_types.hpp|
+|A|+|\_array|[Массивы](https://github.com/arbnet/CppLibrary/wiki/Массивы "описание массивов")|\_types.hpp|
 |B|-|\_base|Базовые классы|\_types.hpp|
 |C|-|\_calc|Вычисления\преобразования|\_types.hpp|
 |D|-|\_disc|Работа с диском||
-|E|+|\_error|[Обработка ошибок](https://github.com/arbnet/CppLibrary/wiki/Обработка-ошибок "посмотреть описание обработки ошибок")|iostream|
+|E|+|\_error|[Обработка ошибок](https://github.com/arbnet/CppLibrary/wiki/Обработка-ошибок "описание обработки ошибок")|iostream|
 |F|-|\_flows|Потоки||
 |G|-|\_grafica|||
 |H|-|\_|||
@@ -27,7 +27,7 @@
 |Q|-|\_|||
 |R|-|\_|||
 |S|-|\_|||
-|T|+|\_types|[Типы данных](https://github.com/arbnet/CppLibrary/wiki/Типы-данных "посмотреть описание типов данных")|cstdlib, typeinfo, сtime, \_zests.hpp|
+|T|+|\_types|[Типы данных](https://github.com/arbnet/CppLibrary/wiki/Типы-данных "описание типов данных")|cstdlib, typeinfo, сtime, \_zests.hpp|
 |U|-|\_|||
 |V|-|\_|||
 |W|-|\_winapi|Window API||
