@@ -505,8 +505,8 @@ namespace t {
 class LINK {
 protected:
 	STRING tp;
-	ADDRESS pnt=NULL;
 	INT_W id=0,sz=0;
+	ADDRESS pnt=NULL;
 public:
 	LINK(){}
 	template<typename dTYPE>
@@ -571,7 +571,7 @@ public:
 	}
 	/** Очистка ссылки */
 	void Clear(){
-		sz=id=0;tp="";pnt=NULL;
+		pnt=NULL;sz=id=0;tp="";
 	}
 	#ifdef _GLIBCXX_IOSTREAM
 	friend std::ostream& operator<<(std::ostream &out,const LINK &obj){
@@ -627,7 +627,7 @@ public:
 		INT_W nsz=z::Lsize(chs)+1;
 		CHARS lts=new LETTER[nsz];
 		ADDRESS adr1=(ADDRESS)lts,adr2=(ADDRESS)chs;
-		z::Copy(adr1,adr2,nsz);LINK::Init(lts);
+		z::Copy(adr1,adr2,sz);LINK::Init(lts);
 		return *this;
 	}
 	ANY& operator=(ANY &obj){

@@ -31,8 +31,11 @@ public:
   /** Установка индекса
    * @param idx новый интдекс */
 	void Index(INT_L idx){z::Index(idx,sz);this->idx=idx;}
-  /** Сброс */
-	void Reset(){Index(this->how?-1:0);}
+  /** Сброс
+	 * @param idx индекс */
+	void Reset(INT_L idx=0){
+		Index(idx?idx:this->how?-1:0);
+	}
   /** Проверка на последний элемент */
 	LOGIC Last(){
 		LOGIC res=false;
@@ -118,7 +121,7 @@ public:
 			INT_L nsz=sz+1;
 			INT_L ntl=rv?z::Volume(nsz,rv):tl;
 			if(nsz<ntl){
-				if(idx)z::Index(idx,sz);else idx=sz;
+				if(idx)z::Index(idx,nsz);else idx=sz;
 				if(tl!=ntl){tl=ntl;
 					dTYPE *nvrs=new dTYPE[tl];
 					if(vars){
@@ -199,6 +202,11 @@ public:
 	template<typename... aARG>
 	Args(aARG... args){(Put(args), ...);}
 	~Args(){Clear();}
+	ANY& operator[](INT_L idx){
+		if(!Size())Array<ADDRESS>::Put(new ANY);
+		return *(ANY*)Array<ADDRESS>::operator[](idx);
+	}
+	/** Очистка аргументов */
 	void Clear(){
 		if(Size()){Reset();
 			do{
@@ -207,14 +215,15 @@ public:
 			Array<ADDRESS>::Clear();
 		}
 	}
-	ANY& operator[](INT_L idx){
-		if(!Size())Array<ADDRESS>::Put(new ANY);
-		return *(ANY*)Array<ADDRESS>::operator[](idx);
-	}
+	/** Положить новый элемент
+	 * @param val значение
+	 * @param idx индекс */
 	template <typename dTYPE>
-	void Put(dTYPE val){
-		Array<ADDRESS>::Put(new ANY(val));
+	void Put(dTYPE val,INT_L idx=0){
+		Array<ADDRESS>::Put(new ANY(val),idx);
 	}
+	/** Взять элемент
+	 * @param idx индекс */
 	ANY Take(INT_L idx=-1){
 		ANY res;
 		if(Size()){
@@ -254,109 +263,61 @@ namespace a {
 		return res;
 	}
 }
+*/
 
-/ * * Аргументы * /
-class Args {
-private:
-	//LOGIC dbl=false;
-	Array<POINTER> apr;	
-	//void Init(){this->apr=new Array<POINTER>;}this->Init();this->Init();
+/** Ассоциативный массив */
+class Associative :public Array<ADDRESS> {
+	ANY& Value(STRING key){
+		idx=this->Find(key);
+		if(idx)return ((KeyValue*)Array<ADDRESS>::operator[](idx))->value;
+		else{
+			KeyValue *skv=new KeyValue;
+			skv->key=key;Array<ADDRESS>::Put(skv);
+			return skv->value;
+		}
+	}
 public:
-	Args(){}
-	template<typename... aARG>
-	Args(aARG... args){(this->Put(args), ...);}
-	//Args(const Args &obj): apr(obj.apr),dbl(true){};
-	//~Args(){if(!this->dbl)delete this->apr;}
-	void Clear(){
-		if(this->dbl){this->Init();this->dbl=false;}
-		else if(apr->Size()){apr->Reset();
+	Associative(){}
+	//Associative(const Associative &obj): apr(obj.apr),dbl(true){}
+	//~Associative(){if(!this->dbl)delete this->apr;}
+	KeyValue operator[](INT_L idx){
+		if(!idx)idx=this->idx;
+		return *(KeyValue*)Array<ADDRESS>::operator[](idx);
+	}
+	ANY& operator[](CHARS chs){
+		return this->Value(STRING(chs));
+	}
+	STRING Key(INT_L idx=0){
+		return ((KeyValue*)Array<ADDRESS>::operator[](idx))->key;
+	}
+	INT_L Find(STRING key,INT_L idx=0){
+		INT_L res=0;
+		if(Size()){
+			INT_L tix=Index();Reset(idx);
 			do{
-				delete static_cast<ANY*>((*apr)[0]);
-			}while(apr->Next());
-			apr->Clear();
-		}
-	}
-	INT_L Size(){return apr.Size();}
-	INT_L Total(){return apr.Total();}
-	INT_L Index(){return apr.Index();}
-	INT_L Reserve(){return apr.Reserve();}
-	void Reset(){apr.Reset();}
-	void Index(INT_L ix){apr.Index(ix);}
-	void How(LOGIC hw){apr.How(hw);}
-	void Reserve(INT_L rv){apr.Reserve(rv);}
-	LOGIC Next(){return apr.Next();}
-	operator bool(){return (LOGIC)apr;}
-	ANY& operator[](INT_L index){
-		if(!apr.Size())apr.Put((POINTER)new ANY);
-		return *(ANY*)apr[index];
-	}
-	template<typename... aARG>
-	void Set(aARG... args){
-		this->Clear();(this->Put(args), ...);
-	}
-	template <typename dTYPE>
-	void Put(dTYPE val){
-		ANY *vdt=new ANY(val);apr->Put(vdt);
-	}
-	ANY Take(INT_L index=0){
-		ANY res;
-		if(apr->Size()){
-			//ANY *any=(ANY*)apr->Take(index);
-			//res=*any;delete any;
-			POINTER pnt=apr->Take(index);
-			res=*(ANY*)pnt;
-			delete static_cast<ANY*>(pnt);
-		}
-		return res;
-	}
-	template <typename dTYPE>
-	INT_L Find(dTYPE val){
-		INT_L res=0,idx=apr->Index();
-		if(apr->Size()){apr->Reset();
-			do{
-				if((*this)[0]==val){
-					res=apr->Index();break;
-				}
-			}while(apr->Next());
-			if(!res)apr->Index(idx);
+				if(key==Key(this->idx)){res=this->idx;break;}
+			}while(Next());
+			Index(tix);
 		}
 		return res;
 	}
 	#ifdef _GLIBCXX_IOSTREAM
-	friend std::ostream& operator<<(std::ostream &out,const Args &oar){
-		Args obj(oar);INT_L sz=obj.Size();
+	friend std::ostream& operator<<(std::ostream &out,Associative &oas){
+		INT_L sz=oas.Size();
 		out<<std::endl;
 		if(sz){out<<'{'<<std::endl;
-			INT_L ix=obj.Index();
+			INT_L ix=oas.Index();
 			for(INT_L nx=0;nx++<sz;){i::tab(1);
-				out<<'['<<nx<<']'<<(ix==nx?'>':' ')<<obj[nx]<<std::endl;
+				KeyValue kv(oas[nx]);
+				out<<'['<<nx<<']'<<(ix==nx?'>':' ')<<kv.key<<'='<<kv.value<<std::endl;
 			}
 			out<<'}';
 		}else out<<"NULL";
 		return out<<std::endl;
 	}
 	#endif
-};
-ID_TYPE(17,Args)
 
-/ * * Ассоциативный массив * /
-class Associative {
-private:
-	Array<POINTER> *apr;
-	LOGIC dbl=false;
-	ANY& Value(STRING key){
-		INT_L index=this->Find(key);
-		if(index)return (*(KeyValue*)(*apr)[index]).value;
-		else{
-			KeyValue *skv=new KeyValue;
-			(*skv).key=key;apr->Put(skv);
-			return (*skv).value;
-		}
-	}
-public:
-	Associative(){this->apr=new Array<POINTER>;}
-	Associative(const Associative &obj): apr(obj.apr),dbl(true){}
-	~Associative(){if(!this->dbl)delete this->apr;}
+	/*
 	void Clear(){
 		if(this->dbl)this->apr=new Array<POINTER>;
 		else if(apr->Size()){apr->Reset();
@@ -366,18 +327,8 @@ public:
 			apr->Clear();
 		}
 	}
-	INT_L Size(){return apr->Size();}
-	INT_L Total(){return apr->Total();}
-	INT_L Index(){return apr->Index();}
-	INT_L Reserve(){return apr->Reserve();}
-	void Reset(){apr->Reset();}
-	void Index(INT_L ix){apr->Index(ix);}
-	void How(LOGIC hw){apr->How(hw);}
-	void Reserve(INT_L rv){apr->Reserve(rv);}
-	LOGIC Next(){return apr->Next();}
 	//template <class oCLASS>
 	//explicit operator oCLASS(){return *static_cast<oCLASS*>(**this->Value());}
-	operator bool(){return apr->Size()?true:false;}
 	//ANY& operator[](INT_L index){
 	//	return (*(KeyValue*)(*apr)[index]).value;
 	//}
@@ -403,22 +354,11 @@ public:
 		}
 		return res;
 	}
-	INT_L Find(STRING key,INT_L index=0){
-		INT_L res=0;
-		if(apr->Size()){
-			INT_L tmp=apr->Index();apr->Reset();
-			do{
-				if(key==this->Key(index)){
-					res=apr->Index();break;
-				}
-			}while(apr->Next());
-			apr->Index(tmp);
-		}
-		return res;
-	}
+	*/
 };
-ID_TYPE(18,Associative)
+ID_TYPE(48,Associative)
 
+/*
 #ifdef FILE_zests
 namespace a {
 	template <typename dTYPE>

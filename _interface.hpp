@@ -19,9 +19,11 @@ namespace i {
 	void tab(INT_W tb=0,LETTER sl=' '){
 		INT_W tsz=t+tb;
 		if(tsz){
-			LETTER lts[tsz+1];ADDRESS pnt=lts;
-			z::Fill(pnt,tsz,(BYTE)sl);*(BYTE*)pnt=0;
-			cout<<lts;
+			POINTER<CHARS> chs(tsz+1);
+			ADDRESS adr=*chs;
+			z::Fill(adr,tsz,(BYTE)sl);
+			*(BYTE*)adr=0;chs.Size(true);
+			cout<<chs;
 		}
 	}
 	/** Ввод значения */
@@ -34,53 +36,39 @@ namespace i {
 	void i(STRING msg,dTYPE &var){
 		cout<<endl<<msg<<": ";cin>>var;
 	}
-	/* * Вывод типа и значения
-	 * @param var переменная * /
-	 -----------------
+	/** Вывод типа и значения
+	 * @param var переменная
+	 * @param cmt комментарий */
 	template <typename dTYPE>
-	void o(const dTYPE &var){
+	void o(const dTYPE &var,STRING cmt=""){
 		ANY any(var);
 		cout<<endl;tab();
 		cout<<any.Type()<<'{'<<any<<'}';
+		if(cmt)cout<<' '<<cmt;
 	}
-	/** Вывод типа и значения с сообщением
-	 * @param msg сообщение
-	 * @param var переменная * /
-	template <typename dTYPE>
-	void o(STRING msg,const dTYPE &var){
-		ANY any(var);
+	/** Вывод строки с параметрами
+	 * @param str строка
+	 * @param cmt комментарий */
+	void o(STRING &str,STRING cmt=""){
+		INT_W rv=str.Reserve();
 		cout<<endl;tab();
-		cout<<msg<<": "<<any.Type()<<'{'<<any<<'}';
+		cout<<"STRING("<<str.Size()<<','<<str.Total();
+		if(rv)cout<<','<<rv;
+		cout<<"){"<<str<<'}';
+		if(cmt)cout<<' '<<cmt;
 	}
-	---------------
-	*/
-	/* * Вывод строки и параметров
-	 * @param str строка * /
-	void o(const STRING &str){
-		STRING obj(str);
-		INT_W rv=obj.Reserve();
-		cout<<endl;t::tab();
-		cout<<"STRING("<<obj.Size();
-		if(rv)cout<<','<<obj.Total()<<','<<rv;
-		cout<<"){"<<obj<<'}';
+	/** Вывод любого типа
+	 * @param any любой тип
+	 * @param cmt комментарий */
+	void o(ANY &any,STRING cmt=""){
+		cout<<endl;tab();
+		cout<<"ANY{"<<any.Type()<<'{'<<any<<"}}";
+		if(cmt)cout<<' '<<cmt;
 	}
-	/ ** Вывод строки и параметров с сообщением
-	 * @param str строка * /
-	void o(STRING msg,const STRING &str){
-		STRING obj(str);
-		INT_W rv=obj.Reserve();
-		cout<<endl;t::tab();
-		cout<<msg<<": "<<"STRING("<<obj.Size();
-		if(rv)cout<<','<<obj.Total()<<','<<rv;
-		cout<<"){"<<obj<<'}';
-	}
-	/ ** Вывод любого типа
-	 * @param any любой тип * /
-	void o(const ANY &any){
-		cout<<endl;t::tab();
-		ANY obj(any);
-		cout<<"ANY("<<obj.Type()<<"){"<<obj<<'}';
-	}
+	/** Вывод параметров */
+	template<typename... aARG>
+	void p(aARG... args){(o(args), ...);}
+	/*
 	void dump(POINTER pnt,INT_W size){
 		cout<<endl<<"#address\t0  1  2  3  4  5  6  7\t\t~~dump~~"<<endl;
 		i::tab(56,'-');cout<<endl<<hex;

@@ -94,7 +94,6 @@ namespace z {
 				if(*(BYTE*)adr1!=*(BYTE*)adr2)res=false;
 				else{Shift(adr1,1);Shift(adr2,1);size-=1;}
 			}
-			//if(!res)break;
 		}
 		return res;
 	}
