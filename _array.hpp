@@ -6,12 +6,6 @@
 
 #include "_types.hpp"
 
-/** Структура КлючЗначение */
-struct KeyValue {
-	STRING key;
-	ANY value;
-};
-
 /** Итератор */
 class Iterator {
 protected:
@@ -145,7 +139,7 @@ public:
 			}
 		}
 	}
-	/** Взять элемент
+	/** Взять значение элемента
 	 * @param idx индекс */
 	dTYPE Take(INT_L idx=-1){
 		dTYPE val;
@@ -179,7 +173,7 @@ public:
 };
 
 ID_TYPE(31,Array<LOGIC>)
-ID_TYPE(32,Array<LETTER>)
+ID_TYPE(32,Array<CHAR>)
 ID_TYPE(33,Array<RANGE>)
 ID_TYPE(34,Array<BYTE>)
 ID_TYPE(35,Array<INT_S>)
@@ -222,7 +216,7 @@ public:
 	void Put(dTYPE val,INT_L idx=0){
 		Array<ADDRESS>::Put(new ANY(val),idx);
 	}
-	/** Взять элемент
+	/** Взять значение элемента
 	 * @param idx индекс */
 	ANY Take(INT_L idx=-1){
 		ANY res;
@@ -265,37 +259,90 @@ namespace a {
 }
 */
 
+
+
 /** Ассоциативный массив */
 class Associative :public Array<ADDRESS> {
-	ANY& Value(STRING key){
-		idx=this->Find(key);
-		if(idx)return ((KeyValue*)Array<ADDRESS>::operator[](idx))->value;
+/** Структура КлючЗначение */
+struct KeyValue {
+	STRING key;// ключ
+	ANY value;// значение
+};	
+	void Add()=delete;
+	KeyValue* SKV(INT_L idx){
+		return (KeyValue*)Array<ADDRESS>::operator[](idx);
+	}
+	KeyValue* SKV(STRING key){
+		KeyValue *skv;
+		INT_L fid=Find(key);
+		if(fid)skv=(KeyValue*)Array<ADDRESS>::operator[](fid);
 		else{
-			KeyValue *skv=new KeyValue;
-			skv->key=key;Array<ADDRESS>::Put(skv);
-			return skv->value;
+			skv=new KeyValue;skv->key=key;
+			Array<ADDRESS>::Put(skv);
 		}
+		return skv;
 	}
 public:
 	Associative(){}
 	//Associative(const Associative &obj): apr(obj.apr),dbl(true){}
-	//~Associative(){if(!this->dbl)delete this->apr;}
-	KeyValue operator[](INT_L idx){
-		if(!idx)idx=this->idx;
-		return *(KeyValue*)Array<ADDRESS>::operator[](idx);
+	~Associative(){Clear();}
+	ANY& operator[](CHARS key){
+		return SKV(key)->value;
 	}
-	ANY& operator[](CHARS chs){
-		return this->Value(STRING(chs));
+	ANY& operator[](STRING key){
+		return SKV(key)->value;
 	}
+	/** Очистка массива */
+	void Clear(){
+		if(sz){Reset();
+			do{
+				delete static_cast<KeyValue*>(Array<ADDRESS>::operator[](0));
+			}while(Next());
+			Array<ADDRESS>::Clear();
+		}
+	}
+	/** Положить новый элемент
+	 * @param key ключ
+	 * @param val значение
+	 * @param idx индекс */
+	void Put(STRING key,ANY val,INT_L idx=-1){
+		KeyValue *skv=SKV(key);
+		skv->key=key;skv->value=val;
+		//Array<ADDRESS>::Put(skv,idx);
+	}
+	/** Получение ключа
+	 * @param idx индекс */
 	STRING Key(INT_L idx=0){
-		return ((KeyValue*)Array<ADDRESS>::operator[](idx))->key;
+		STRING key;
+		if(sz)key=((KeyValue*)Array<ADDRESS>::operator[](idx))->key;
+		return key;
+	}
+	/** Получение значения
+	 * @param idx индекс */
+	ANY Value(INT_L idx=0){
+		ANY val;
+		if(sz)val=((KeyValue*)Array<ADDRESS>::operator[](idx))->value;
+		return val;
+	}
+	/** Взять значение элемента
+	 * @param key ключ
+	 * @return значение */
+	ANY Take(STRING key){
+		ANY val;
+		INT_L fid=Find(key);
+		if(fid){
+			ADDRESS pnt=Array<ADDRESS>::Take(fid);
+			val=((KeyValue*)pnt)->value;
+			delete static_cast<KeyValue*>(pnt);
+		}
+		return val;
 	}
 	INT_L Find(STRING key,INT_L idx=0){
 		INT_L res=0;
-		if(Size()){
+		if(sz){
 			INT_L tix=Index();Reset(idx);
 			do{
-				if(key==Key(this->idx)){res=this->idx;break;}
+				if(key==Key()){res=Index();break;}
 			}while(Next());
 			Index(tix);
 		}
@@ -306,55 +353,25 @@ public:
 		INT_L sz=oas.Size();
 		out<<std::endl;
 		if(sz){out<<'{'<<std::endl;
+			INT_W ltb=0;
+			for(INT_L nx=0;nx++<sz;){
+				INT_W ksz=oas.Key(nx).Size();
+				if(ltb<ksz)ltb=ksz;
+			}
+			ltb++;
+			KeyValue *kv;
 			INT_L ix=oas.Index();
-			for(INT_L nx=0;nx++<sz;){i::tab(1);
-				KeyValue kv(oas[nx]);
-				out<<'['<<nx<<']'<<(ix==nx?'>':' ')<<kv.key<<'='<<kv.value<<std::endl;
+			for(INT_L nx=0;nx++<sz;){
+				i::tab(1);kv=oas.SKV(nx);
+				out<<'['<<nx<<']'<<(ix==nx?'>':' ');
+				i::w(ltb);i::l();
+				out<<kv->key<<'='<<kv->value<<std::endl;
 			}
 			out<<'}';
 		}else out<<"NULL";
 		return out<<std::endl;
 	}
 	#endif
-
-	/*
-	void Clear(){
-		if(this->dbl)this->apr=new Array<POINTER>;
-		else if(apr->Size()){apr->Reset();
-			do{
-				delete static_cast<KeyValue*>((*apr)[0]);
-			}while(apr->Next());
-			apr->Clear();
-		}
-	}
-	//template <class oCLASS>
-	//explicit operator oCLASS(){return *static_cast<oCLASS*>(**this->Value());}
-	//ANY& operator[](INT_L index){
-	//	return (*(KeyValue*)(*apr)[index]).value;
-	//}
-	ANY& operator[](const STRING &key){
-		return this->Value(key);
-	}
-	ANY& operator[](CHARS(ltr)){
-		return this->Value(STRING(ltr));
-	}
-	STRING Key(INT_L index=0){
-		return (*(KeyValue*)(*apr)[index]).key;
-	}
-	ANY& Value(INT_L index=0){
-		return (*(KeyValue*)(*apr)[index]).value;
-	}
-	KeyValue Take(STRING key){
-		KeyValue res;
-		INT_L index=this->Find(key);
-		if(index){
-			POINTER pnt=apr->Take(index);
-			res=*(KeyValue*)pnt;
-			delete static_cast<KeyValue*>(pnt);
-		}
-		return res;
-	}
-	*/
 };
 ID_TYPE(48,Associative)
 

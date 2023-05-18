@@ -5,40 +5,57 @@
 #define FILE_interface
 
 #include <clocale>
+#include <iomanip>
+#include <fcntl.h>
 #include <iostream>
 #include "_calc.hpp"
 
 /** Пространство имёт от _interface */
 namespace i {
 	using namespace std;
-	/** число символов сдвига табуляции*/
-	INT_W t=0;
+	/** число символов сдвига табуляции */
+	INT_W tab=0;
 	/** Табуляция 
 	 * @param tb число символов табуляции
 	 * @param sl символ табуляции	*/
-	void tab(INT_W tb=0,LETTER sl=' '){
-		INT_W tsz=t+tb;
-		if(tsz){
-			POINTER<CHARS> chs(tsz+1);
-			ADDRESS adr=*chs;
-			z::Fill(adr,tsz,(BYTE)sl);
-			*(BYTE*)adr=0;chs.Size(true);
-			cout<<chs;
-		}
+	void t(INT_W tb=2){
+		BYTE tsz=tab+tb;
+		_COUT<<setfill(_L(' '))<<setw(tsz)<<_L(' ');
+	}
+	/** Символ заполнения */
+	void f(const CHAR chr){
+		cout<<setfill(chr);
+	}
+	/** Символ заполнения */
+	void f(const WCHAR chr){
+		wcout<<setfill(chr);
+	}
+	/** Флаг вывода с лево */
+	void l(){
+		_COUT<<setiosflags(ios::left);
+	}
+	/** Флаг вывода с право */
+	void r(){
+		_COUT<<setiosflags(ios::right);
+	}
+	/** Ширина вывода
+	 * @param wh количество символов */
+	void w(BYTE wh){
+		_COUT<<setw(wh);
 	}
 	/** Ввод значения */
 	template <typename dTYPE>
 	void i(dTYPE &var){
 		cin>>var;
 	}
-	/** Ввод значения с сообщением */
+	/* * Ввод значения с сообщением * /
 	template <typename dTYPE>
 	void i(STRING msg,dTYPE &var){
 		cout<<endl<<msg<<": ";cin>>var;
 	}
-	/** Вывод типа и значения
+	/ ** Вывод типа и значения
 	 * @param var переменная
-	 * @param cmt комментарий */
+	 * @param cmt комментарий * /
 	template <typename dTYPE>
 	void o(const dTYPE &var,STRING cmt=""){
 		ANY any(var);
@@ -46,9 +63,9 @@ namespace i {
 		cout<<any.Type()<<'{'<<any<<'}';
 		if(cmt)cout<<' '<<cmt;
 	}
-	/** Вывод строки с параметрами
+	/ ** Вывод строки с параметрами
 	 * @param str строка
-	 * @param cmt комментарий */
+	 * @param cmt комментарий * /
 	void o(STRING &str,STRING cmt=""){
 		INT_W rv=str.Reserve();
 		cout<<endl;tab();
@@ -57,14 +74,14 @@ namespace i {
 		cout<<"){"<<str<<'}';
 		if(cmt)cout<<' '<<cmt;
 	}
-	/** Вывод любого типа
+	/ ** Вывод любого типа
 	 * @param any любой тип
-	 * @param cmt комментарий */
+	 * @param cmt комментарий * /
 	void o(ANY &any,STRING cmt=""){
 		cout<<endl;tab();
 		cout<<"ANY{"<<any.Type()<<'{'<<any<<"}}";
 		if(cmt)cout<<' '<<cmt;
-	}
+	}*/
 	/** Вывод параметров */
 	template<typename... aARG>
 	void p(aARG... args){(o(args), ...);}
@@ -98,13 +115,13 @@ namespace i {
 		cout<<endl<<"# "<<::Type<dTYPE>::Name;
 		dump((POINTER)&var,sizeof(var));
 	}
-	void dump(LETTER *ltr){
+	void dump(CHAR *ltr){
 		INT_W sz=z::Lsize(ltr);
-		cout<<endl<<"# "<<(sz>1?"CHARS":"LETTER");
+		cout<<endl<<"# "<<(sz>1?"CHARS":"CHAR");
 		dump((POINTER)ltr,sz);
 	}
 	void dump(CHARS(ltr)){
-		dump((LETTER*)ltr);
+		dump((CHAR*)ltr);
 	}
 	void dump(const STRING &str,STRING msg=""){
 		cout<<endl<<"# STRING";
@@ -112,10 +129,18 @@ namespace i {
 		STRING obj(str);
 		dump((POINTER)*obj,obj.Total());
 	}*/
-	/** Пауза */
-	void p(){
-		cout<<endl;system("pause");
-	}
+		
 	/** Включение кирилицы */
-	void r(){setlocale(LC_ALL,"");}
+	void c(){
+		setlocale (LC_ALL,"");
+		#ifdef UNICODE
+    _setmode(_fileno(stdin),_O_U8TEXT);
+		_setmode(_fileno(stdout),_O_U8TEXT);
+    _setmode(_fileno(stderr),_O_U8TEXT);
+		#endif
+	}
+	/** Остановка */
+	void s(){
+		_COUT<<endl;system("pause");
+	}
 }

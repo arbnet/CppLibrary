@@ -146,7 +146,12 @@ namespace z {
 	/** Получение длинны массива символов
 	 * @param chs массив символов
 	 * @return размер массива символов */
-	INT_W Lsize(CHARS chs){
+	INT_W Lsize(const CHAR *chs){
+		INT_W sz=0;
+    while (*chs++){sz++;if(sz==65535)break;}
+    return sz;
+	}
+	INT_W Lsize(const WCHAR *chs){
 		INT_W sz=0;
     while (*chs++){sz++;if(sz==65535)break;}
     return sz;
